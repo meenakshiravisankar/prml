@@ -1,34 +1,58 @@
-# importing csv module
+# References
+# 1) https://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
+#    To understand how to extract the data from the csv file, and also how to
+#    split the data into train, test and validation sets
+
+##########################################################################
+
 import csv
+import random
 
-# csv file name
-filename = "Datasets_PRML_A1/Dataset_1_Team_39.csv"
+def loadCsv(filename):
+    rows = []
+    with open(filename, 'r') as csvfile:
+        # creating a csv reader object
+        csvreader = csv.reader(csvfile)
 
-# initializing the titles and rows list
-fields = []
-rows = []
+        # extracting field names through first row
+        fields = next(csvreader)
 
-# reading csv file
-with open(filename, 'r') as csvfile:
-    # creating a csv reader object
-    csvreader = csv.reader(csvfile)
+        # extracting each data row one by one
+        for row in csvreader:
+            rows.append(row)
 
-    # extracting field names through first row
-    fields = next(csvreader)
+        new_rows = []
+        for row in rows:
+            temp = []
+            for c in row:
+                temp.append(float(c))
+            new_rows.append(temp)
+        return new_rows
 
-    # extracting each data row one by one
-    for row in csvreader:
-        rows.append(row)
+def splitDataset(dataset):
+    trainSize = int(len(dataset) * 0.7)
+    trainSet = []
+    copy = list(dataset)
+    while len(trainSet) < trainSize:
+        index = random.randrange(len(copy))
+        trainSet.append(copy.pop(index))
 
-new_rows = []
-for row in rows:
-    temp = []
-    for c in row:
-        temp.append(float(c))
-    new_rows.append(temp)
+    testSize =  int(len(dataset) * 0.15)
+    testSet = []
+    copy1 = list(copy)
+    while len(testSet) < testSize:
+        index = random.randrange(len(copy1))
+        testSet.append(copy1.pop(index))
+    validationSet = copy1
+    return [trainSet, testSet, validationSet]
 
-n_rows = len(rows)
-n_cols = len(rows[0])
+filename = "../Datasets_PRML_A1/Dataset_1_Team_39.csv"
+dataset = loadCsv(filename)
+train, test, val = splitDataset(dataset)
+print("The number of training samples is %d, test samples, is %d and validation samples is %d" %(len(train), len(test), len(val)))
+
+n_rows = len(dataset)
+n_cols = len(dataset[0])
 
 # number of features
 n_feat = n_cols - 1
@@ -38,7 +62,7 @@ m = 0
 m_max = 0
 
 if n_cols > 1:
-    for r in new_rows:
+    for r in dataset:
         if r[n_cols-1] > m:
             m_max = r[n_cols-1]
 
@@ -51,7 +75,7 @@ print("Number of features = %d" %(n_feat))
 print("Number of class labels = %d (0 to %d)" %(m, m_max))
 
 # finding prior probabilities
-for row in new_rows:
+for row in dataset:
     classlabels[int(row[n_cols-1])] = classlabels[int(row[n_cols-1])] + 1
 
 priors = [x / n_rows for x in classlabels]
