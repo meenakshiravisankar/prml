@@ -8,6 +8,7 @@ import csv
 import random
 import numpy as np
 import math
+from decimal import Decimal
 
 def loadCsv(filename):
     rows = []
@@ -52,6 +53,21 @@ def evalGaussian(X, mu, sigma):
     factor = 1/(math.sqrt(2 * math.pi) * sigma)
     value = factor * math.exp(power)
     return value
+
+def computeClassCase1(L, means, variances, X):
+    for alpha_i in range(0, 3):
+        mean = means[alpha_i]
+        var = variances[alpha_i]
+        sd = [math.sqrt(v) for v in var]
+        f0 = evalGaussian(X[0], mean[0], sd[0])
+        f1 = evalGaussian(X[1], mean[1], sd[1])
+        sub = np.subtract(X, mean)
+        temp = [x*x for x in sub]
+        sum = np.sum(temp)
+        disc = (-0.5 * sum) + float(Decimal(f0 * f1).ln())
+        if disc > 0:
+            return alpha_i
+    return random.randrange(3)
 
 filename = "../Datasets_PRML_A1/Dataset_1_Team_39.csv"
 dataset = loadCsv(filename)
@@ -118,3 +134,18 @@ print(ccd_variances)
 # for dataset 1, covariance matrix is given to be I
 covariances = np.eye(n_feat)
 print(covariances)
+
+# given loss function
+loss_fn = np.matrix([[0,1,2],[1,0,1],[2,1,0]])
+print(loss_fn)
+
+total = 0
+for row in dataset:
+    actual_class = int(row[n_cols-1])
+    X = [int(x) for x in row[0:n_cols-1]]
+    predicted_class = computeClassCase1(loss_fn, ccd_means, ccd_variances, X)
+    if actual_class == predicted_class:
+        total = total + 1
+
+accuracy = (total / n_rows) * 100
+print("Accuracy of predictions = %f" %(accuracy))
