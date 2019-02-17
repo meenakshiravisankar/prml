@@ -1,7 +1,6 @@
 # References
 # 1) https://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
-#    To understand how to extract the data from the csv file, and also how to
-#    split the data into train, test and validation sets
+#    To understand how to split the data into train, test and validation sets
 
 ##########################################################################
 
@@ -81,3 +80,24 @@ for row in dataset:
 priors = [x / n_rows for x in classlabels]
 
 print(priors)
+
+# finding class conditional density parameters by MLE
+# MLE for mean is sample mean
+ccd_tot = [0] * m
+fv = [0] * n_feat
+ccd_means = []
+for i in range (0, m):
+    ccd_means.append(fv)
+
+for row in dataset:
+    cl = int(row[n_cols-1])
+    lists = []
+    lists.append(ccd_means[cl])
+    lists.append(list(row[0:n_cols-1]))
+    ccd_means[cl] = [sum(x) for x in zip(*lists)]
+    ccd_tot[cl] = ccd_tot[cl] + 1
+
+for i in range(0, m):
+    for j in range (0, n_feat):
+     ccd_means[i][j] = ccd_means[i][j] / ccd_tot[i]
+print(ccd_means)
