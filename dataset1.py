@@ -6,6 +6,8 @@
 
 import csv
 import random
+import numpy as np
+import math
 
 def loadCsv(filename):
     rows = []
@@ -45,6 +47,12 @@ def splitDataset(dataset):
     validationSet = copy1
     return [trainSet, testSet, validationSet]
 
+def evalGaussian(X, mu, sigma):
+    power = ((X - mu) * (X - mu) * (-1)) / (2 * sigma * sigma)
+    factor = 1/(math.sqrt(2 * math.pi) * sigma)
+    value = factor * math.exp(power)
+    return value
+
 filename = "../Datasets_PRML_A1/Dataset_1_Team_39.csv"
 dataset = loadCsv(filename)
 train, test, val = splitDataset(dataset)
@@ -83,21 +91,30 @@ print(priors)
 
 # finding class conditional density parameters by MLE
 # MLE for mean is sample mean
-ccd_tot = [0] * m
-fv = [0] * n_feat
-ccd_means = []
-for i in range (0, m):
-    ccd_means.append(fv)
-
+ccd_tot = np.zeros((m,1), dtype = float, order = 'C')
+ccd_means = np.zeros((m, n_feat), dtype = float, order = 'C')
 for row in dataset:
     cl = int(row[n_cols-1])
-    lists = []
-    lists.append(ccd_means[cl])
-    lists.append(list(row[0:n_cols-1]))
-    ccd_means[cl] = [sum(x) for x in zip(*lists)]
+    ccd_means[cl] = np.add(ccd_means[cl], list(row[0:n_cols-1]))
     ccd_tot[cl] = ccd_tot[cl] + 1
 
 for i in range(0, m):
     for j in range (0, n_feat):
      ccd_means[i][j] = ccd_means[i][j] / ccd_tot[i]
 print(ccd_means)
+
+# MLE for variance is (1/n)sigma(Xi - mean)^2
+ccd_variances = np.zeros((m, n_feat), dtype = float, order = 'C')
+for row in dataset:
+    cl = int(row[n_cols-1])
+    temp = np.subtract(list(row[0:n_cols-1]), ccd_means[cl])
+    ccd_variances[cl] = [x*x for x in temp]
+
+for i in range(0, m):
+    for j in range (0, n_feat):
+     ccd_variances[i][j] = ccd_variances[i][j] / ccd_tot[i]
+print(ccd_variances)
+
+# for dataset 1, covariance matrix is given to be I
+covariances = np.eye(n_feat)
+print(covariances)
