@@ -66,12 +66,11 @@ classConditional = getConditional(X_train, means, np.eye(2), "naive")
 print("Computing risk")
 risk = getRisk(lossfunction, classConditional, prior)
 
-prediction = np.argmax(risk, axis=1)
+prediction = np.argmin(risk, axis=1)
 
 unique, counts = np.unique(prediction, return_counts=True)
-print(unique)
-print(np.sum(prediction))
-print(prediction.shape)
-print(risk.shape)
+
+print("Accuracy of the prediction",np.sum(prediction == y_train)/y_train.shape[0])
+
 # print(classConditional.shape)
 # print(prior.shape)
