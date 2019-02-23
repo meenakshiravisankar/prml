@@ -1,5 +1,4 @@
 import numpy as np 
-from sklearn.model_selection import train_test_split
 from scipy.stats import multivariate_normal
 from sklearn.metrics import confusion_matrix
 import confusion_matrix as cf_mat
