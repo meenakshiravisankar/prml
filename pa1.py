@@ -24,15 +24,16 @@ y_val = data[train_size:train_size+val_size,-1]
 X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
 y_test = data[train_size+val_size:train_size+val_size+test_size,-1]
 
+print()
 print("Size of train, validation and test sets",X_train.shape,X_val.shape,X_test.shape)
+print()
 
 classes, prior = f.getPrior(y_train)
 print("Number of classes", len(classes))
+print()
 means = np.array(f.getMLE(X_train, y_train))
 lossfunction = np.array([[0,1,2],[1,0,1],[2,1,0]])
 
-print("\n")
-print("\n")
 accuracies = []
 
 print("Model 1 - Naive Bayes and covariance is identity")
@@ -43,13 +44,13 @@ prediction, accuracy =  f.getModel(X_val, y_val, means, np.eye(2), lossfunction,
 print("Validation accuracy {:.2f}".format(accuracy))
 prediction, accuracy =  f.getModel(X_test, y_test, means, np.eye(2), lossfunction, prior, "naive")
 print("Test accuracy {:.2f}".format(accuracy))
-f.getConfusion(y_test,prediction, "Model 1")
+#f.getConfusion(y_test,prediction, "Model 1")
 
 print("\n")
 
 
 print("Model 2 - Naive Bayes and covariance is same")
-cov_rand = np.random.rand(1)*np.eye(2)
+cov_rand = f.getCovMatrix(np.transpose(X_train))
 prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive")
 print("Train accuracy {:.2f}".format(accuracy))
 accuracies.append(accuracy)
@@ -57,13 +58,13 @@ prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, 
 print("Validation accuracy {:.2f}".format(accuracy))
 prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive")
 print("Test accuracy {:.2f}".format(accuracy))
-f.getConfusion(y_test,prediction, "Model 2")
+#f.getConfusion(y_test,prediction, "Model 2")
 
 print("\n")
 
 
 print("Model 3 - Naive Bayes and covariance different")
-cov_rand = np.random.rand(2,2)
+cov_rand = f.getCovMatrix(np.transpose(X_train)) # change this
 prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive")
 print("Train accuracy {:.2f}".format(accuracy))
 accuracies.append(accuracy)
@@ -71,13 +72,13 @@ prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, 
 print("Validation accuracy {:.2f}".format(accuracy))
 prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive")
 print("Test accuracy {:.2f}".format(accuracy))
-f.getConfusion(y_test,prediction, "Model 3")
+#f.getConfusion(y_test,prediction, "Model 3")
 
 print("\n")
 
 
 print("Model 4 -  Bayes and covariance is same")
-cov_rand = np.random.rand(1)*np.eye(2)
+cov_rand = f.getCovMatrix(np.transpose(X_train))
 prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes")
 print("Train accuracy {:.2f}".format(accuracy))
 accuracies.append(accuracy)
@@ -85,13 +86,13 @@ prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, 
 print("Validation accuracy {:.2f}".format(accuracy))
 prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes")
 print("Test accuracy {:.2f}".format(accuracy))
-f.getConfusion(y_test,prediction, "Model 4")
+#f.getConfusion(y_test,prediction, "Model 4")
 
 print("\n")
 
 print("Model 5 - Bayes and covariance is identity")
 print("Model 5 - Bayes and covariance different")
-cov_rand = np.random.rand(2,2)
+cov_rand = f.getCovMatrix(np.transpose(X_train))
 prediction1, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes")
 print("Train accuracy {:.2f}".format(accuracy))
 accuracies.append(accuracy)
@@ -99,7 +100,7 @@ prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, 
 print("Validation accuracy {:.2f}".format(accuracy))
 prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes")
 print("Test accuracy {:.2f}".format(accuracy))
-f.getConfusion(y_test,prediction, "Model 5")
+#f.getConfusion(y_test,prediction, "Model 5")
 
 print("\n")
 

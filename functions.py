@@ -28,25 +28,39 @@ def mean(X):
 
 def getCovariance(X1, X2):
     Z = []
-    n = X1.len
+    n = len(X1)
     for i in range(n):
-        Z.appemd(X1[i]*X2[i])
+        Z.append(X1[i]*X2[i])
     e_x1x2 = mean(Z)
     e_x1 = mean(X1)
     e_x2 = mean(X2)
     cov = e_x1x2 - (e_x1*e_x2)
     return cov
 
+def getCovMatrix(X):
+    n = len(X)
+    cov_mat = []
+    for i in range(n):
+        for j in range(n):
+            cov_mat.append(getCovariance(X[i], X[j]))
+    return np.reshape(cov_mat, (n, n))
+
+def minus(X, m):
+    m = np.transpose(m)
+    for i in range(len(X)):
+        X[i] = X[i] - m
+    return X
+
 def mvNormal(X, mu, sigma):
     det = np.linalg.det(sigma)
-    n = X.size()
+    n = len(X)
     sigma_inv = np.linalg.inv(sigma)
-    exponent = (-0.5) * (np.transpose(X - mu)) * sigma_inv * (X - mu)
+    exponent = (-0.5) * (minus(X, mu)) * sigma_inv * np.transpose(minus(X, mu))
     factor = 1.0 / (math.sqrt((2 * math.pi)**n) * det)
     return (factor * math.exp(exponent))
 
 def eval1DGaussian(X, mu, sigma):
-    power = (np.sum((X-mu)*(X-mu)) * (-1)) / (2 * sigma * sigma)
+    power = (np.sum((X-mu)*(X-mu)) * -1) / (2 * sigma * sigma)
     factor = 1/(math.sqrt(2 * math.pi) * sigma)
     value = factor * math.exp(power)
     return value
@@ -96,8 +110,6 @@ def getConfusion(y_test, prediction, name) :
 def getModel(X, y, means, cov, lossfunction, prior, mode) :
     classConditional = getConditional(X, means, cov, mode)
     risk = getRisk(lossfunction, classConditional, prior)
-    print(risk)
     prediction = np.argmin(risk, axis=1)
-    print(prediction)
     accuracies = np.sum(prediction == y)/y.shape[0]*100
     return prediction, accuracies
