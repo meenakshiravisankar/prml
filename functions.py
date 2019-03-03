@@ -45,19 +45,18 @@ def getCovMatrix(X):
             cov_mat.append(getCovariance(X[i], X[j]))
     return np.reshape(cov_mat, (n, n))
 
-def minus(X, m):
-    m = np.transpose(m)
-    for i in range(len(X)):
-        X[i] = X[i] - m
-    return X
-
 def mvNormal(X, mu, sigma):
     det = np.linalg.det(sigma)
-    n = len(X)
+    n = len(mu)
     sigma_inv = np.linalg.inv(sigma)
-    exponent = (-0.5) * (minus(X, mu)) * sigma_inv * np.transpose(minus(X, mu))
-    factor = 1.0 / (math.sqrt((2 * math.pi)**n) * det)
-    return (factor * math.exp(exponent))
+    value = ((-0.5) * (X - mu) * sigma_inv * (X - mu)) / ((2 * math.pi)**(-n/2) * math.sqrt(det))
+    return value
+
+def mvNormalPDF(X, mu, sigma):
+    vals = []
+    for i in range(len(X)):
+        vals.append(mvNormal(X[i], mu, sigma))
+    return vals
 
 def eval1DGaussian(X, mu, sigma):
     power = (np.sum((X-mu)*(X-mu)) * -1) / (2 * sigma * sigma)
@@ -74,11 +73,11 @@ def getConditional(X, mu, sigma, mode):
         if mode == "naive" :
             value = 1
             for feature in range(mu.shape[1]) :
-                # value *= (multivariate_normal.pdf(X[:,feature],mean=mu[class_val][feature],cov=sigma[feature][feature]))
                 value *= eval1DGaussian(X[:,feature], mu[class_val][feature], sigma[feature][feature])
+                # doubt: shouldn't we consider only those features that have been assigned this class_val??
         else :
-            # value =  multivariate_normal.pdf(X,mean=mu[class_val],cov=sigma)
-            value =  mvNormal(X, mu[class_val], sigma)
+            value = multivariate_normal.pdf(X, mean=mu[class_val], cov=sigma)
+            #value =  mvNormalPDF(X, mu[class_val], sigma)
         prob.append(value)
     return np.transpose(np.array(prob))
 

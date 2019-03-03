@@ -1,11 +1,10 @@
 import numpy as np
 import functions as f
-from scipy.stats import multivariate_normal
 
 np.random.seed(seed=42)
 
-# change the file to the dataset which gives best model for pa1
-data = np.loadtxt("../Datasets_PRML_A1/Dataset_1_Team_39.csv", delimiter=',', dtype=None)
+# using the bayes classifier with all different covariance as the best model
+data = np.loadtxt("../Datasets_PRML_A1/Dataset_2_Team_39.csv", delimiter=',', dtype=None)
 
 # shuffling
 np.random.shuffle(data)
@@ -35,7 +34,7 @@ for ds in dataset_sizes:
         y = y_train[:ds]
         classes, prior = f.getPrior(y)
         means = np.array(f.getMLE(X, y))
-        cov_rand = np.random.rand(1)*np.eye(2) # change this to actual covariance
+        cov_rand = f.getCovMatrix(np.transpose(X_train))
         train_pred, train_acc =  f.getModel(X, y, means, cov_rand, lossfunction, prior, "bayes")
         test_pred, test_acc =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes")
         test_accuracy.append(test_acc)
