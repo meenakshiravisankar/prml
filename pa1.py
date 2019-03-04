@@ -61,9 +61,9 @@ data = np.loadtxt("../Datasets_PRML_A1/Dataset_1_Team_39.csv", delimiter=',', dt
 np.random.shuffle(data)
 
 # splitting into train, test, validation - 80, 10, 10 and converting to numpy array
-train_size = int(0.8*data.shape[0])
-val_size = int(0.1*data.shape[0])
-test_size = int(0.1*data.shape[0])
+train_size = int(0.7*data.shape[0])
+val_size = int(0.15*data.shape[0])
+test_size = int(0.15*data.shape[0])
 
 X_train = data[:train_size,:2]
 y_train = data[:train_size,-1]
