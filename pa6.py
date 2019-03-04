@@ -6,16 +6,6 @@ import matplotlib.pyplot as plt
 
 random.seed(42)
 
-'''Let X be unif(-1; 1) and Y = e(tanh(2p*i*x)) - x. Let the noise be N(0; sigma2), with sigma2 = 0.2.
-Analyze bias-variance trade-off for the three models corresponding to the polynomials
-of degrees 1, 5, 9 respectively. In particular do the following for each model:
-1. Sample 10 points and do Ridge regression for lambda = 0.001, 0.01, 0.1.
-2. Store the empirical risk observed for this data-set.
-Repeat the steps 1,2 above for 1000 times. Plot the histogram of the empirical risk for
-each of the models.
-Interpret the results, and relate the observed behaviour with bias-variance trade-off.
-Refer to Figure 9.4 of Duda's book.'''
-
 def func(x):
     return math.exp(2*math.pi*x) - x
 
@@ -38,6 +28,8 @@ degrees = [1, 5, 9]
 lambdas = [0.001, 0.01, 0.1]
 for d in degrees:
     w = []
+    # find w using (phi(x)' * phi(x))^-1 * phi(x)' * y
+    # here, I have put some dummy
     for i in range(d):
         w.append(random.randint(1,101))
     for myLambda in lambdas:
