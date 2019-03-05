@@ -93,7 +93,7 @@ def getCompleteCovMatrix(X, y):
 
 # read dataset
 data = np.loadtxt("../Datasets_PRML_A1/Dataset_3_Team_39.csv", delimiter=',', dtype=None)
-lossfunction = np.array([[1, 0], [0, 1]])
+lossfunction = np.array([[0, 1], [1, 0]])
 
 # train, test, validation set sizes - 70, 15, 15
 train_size = int(0.7*data.shape[0])
