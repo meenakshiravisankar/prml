@@ -4,8 +4,8 @@ from scipy.stats import multivariate_normal
 
 np.random.seed(seed=42)
 
-# change the file to the dataset which gives best model for pa1
-data = np.loadtxt("../Datasets_PRML_A1/Dataset_1_Team_39.csv", delimiter=',', dtype=None)
+# dataset 2 gives best accuracy with Model 5 in problem 1
+data = np.loadtxt("../Datasets_PRML_A1/Dataset_2_Team_39.csv", delimiter=',', dtype=None)
 
 # shuffling
 np.random.shuffle(data)
