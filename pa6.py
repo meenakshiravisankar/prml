@@ -6,21 +6,6 @@ import matplotlib.pyplot as plt
 
 random.seed(42)
 
-def func(x):
-    return math.exp(np.tanh(2*math.pi*x)) - x
-
-def eval(w, x):
-    sum = 0
-    for i in range(len(w)):
-        sum += (w[i] * (x**i))
-    return sum
-
-def norm(w):
-    norm_val = 0
-    for i in range(len(w)):
-        norm_val += w[i]*w[i]
-    return norm_val
-
 def getPolyfeatures(X,n) :
     return np.squeeze(np.transpose(np.array([X**i for i in range(n+1)])))
 
