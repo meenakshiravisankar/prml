@@ -15,8 +15,9 @@ def getPolyfit(X,w) :
 def getWeights(X,y,ridge) :
     return np.matmul(np.matmul(np.linalg.inv(ridge*np.eye(X.shape[1]) + np.matmul(np.transpose(X),X)),np.transpose(X)),y)
 
-def getEmpiricalRisk(y_train, y_pred):
+def getEmpiricalRisk(y_train, y_pred, w, lamda):
     diff = y_train - y_pred
+    ridge = lamda * sum(w*w)
     sqd = np.squeeze(np.array([x*x for x in diff]))
     return sum(sqd)
 
@@ -33,7 +34,7 @@ for d in degrees:
             X_poly = getPolyfeatures(X, d)
             w = getWeights(X_poly, y, myLambda)
             y_pred = getPolyfit(X_poly, w)
-            er = getEmpiricalRisk(y, y_pred)
+            er = getEmpiricalRisk(y, y_pred, w, myLambda)
             empirical_risks.append(er)
-    plt.hist(empirical_risks, bins=50,alpha=0.5)
-    plt.show()
+        plt.hist(empirical_risks, bins=50,alpha=0.5)
+        plt.show()

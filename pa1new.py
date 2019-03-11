@@ -54,7 +54,7 @@ def getConfusion(y_test, prediction, name) :
     # Plot non-normalized confusion matrix
     plt.figure()
     cf_mat.plot_confusion_matrix(cnf_matrix, classes=class_names,title=name)
-    plt.savefig("../results_new/"+name)
+    plt.savefig("results/"+name)
     # plt.show()
     return
 
@@ -202,7 +202,7 @@ getConfusion(y_test,prediction, "Model 5 Dataset 1")
 
 print("\n")
 
-np.savetxt('../results_new/accuracy_of_models_dataset_1',accuracies,fmt='%.2f')
+np.savetxt('results/accuracy_of_models_dataset_1',accuracies,fmt='%.2f')
 
 # shuffling
 np.random.shuffle(data2)
@@ -299,4 +299,4 @@ getConfusion(y_test,prediction, "Model 5 Dataset 2")
 
 print("\n")
 
-np.savetxt('../results_new/accuracy_of_models_dataset_2',accuracies,fmt='%.2f')
+np.savetxt('results/accuracy_of_models_dataset_2',accuracies,fmt='%.2f')
