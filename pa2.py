@@ -16,7 +16,6 @@ def getMLE(X,y) :
         means.append(np.mean(X[np.where(y==class_val)],axis=0))
     return means
 
-
 def getConditionalSameCov(X, mu, sigma, mode):
     prob = []
     for class_val in range(mu.shape[0]) :
@@ -97,7 +96,7 @@ np.random.shuffle(data)
 
 # splitting into train, test - 80, 20 - and converting to numpy array
 train_size = int(0.8*data.shape[0])
-test_size = int(0.1*data.shape[0])
+test_size = int(0.2*data.shape[0])
 
 X_train = data[:train_size,:2]
 y_train = data[:train_size,-1]
@@ -115,13 +114,11 @@ for ds in dataset_sizes:
     # 20 replications
     test_accuracy = []
     for i in range(20):
-        np.random.shuffle(X_train)
-        np.random.shuffle(y_train)
         X = X_train[:ds]
         y = y_train[:ds]
         classes, prior = getPrior(y)
         means = np.array(getMLE(X, y))
-        cov_rand = getCompleteCovMatrix(X_train, y_train)
+        cov_rand = getCompleteCovMatrix(X, y)
         train_pred, train_acc =  getModel(X, y, means, cov_rand, lossfunction, prior, "bayes", "diff")
         test_pred, test_acc =  getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "diff")
         test_accuracy.append(test_acc)
