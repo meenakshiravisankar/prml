@@ -1,5 +1,4 @@
 import numpy as np
-import functions as f
 import math
 import random
 import matplotlib.pyplot as plt
@@ -19,7 +18,7 @@ def getEmpiricalRisk(y_train, y_pred, w, lamda):
     diff = y_train - y_pred
     ridge = lamda * sum(w*w)
     sqd = np.squeeze(np.array([x*x for x in diff]))
-    return sum(sqd)
+    return (sum(sqd) + ridge)
 
 degrees = [1, 5, 9]
 lambdas = [0.001, 0.01, 0.1]
