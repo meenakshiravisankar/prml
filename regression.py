@@ -3,23 +3,25 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def getPolyfit(X,w) :
-    # print(X.shape, w.shape)
     return np.matmul(X,w)
 
 def getWeights(X,y,ridge) :
-    # print(X.shape, y.shape)
+    print(np.matmul(np.transpose(X),X))
+    # print(ridge*np.eye(X.shape[1]) + np.matmul(np.transpose(X),X))
+
+    # print(np.linalg.inv(ridge*np.eye(X.shape[1]) + np.matmul(np.transpose(X),X)))
+    # print(np.matmul(np.matmul(np.linalg.inv(ridge*np.eye(X.shape[1]) + np.matmul(np.transpose(X),X)),np.transpose(X)),y))
     return np.matmul(np.matmul(np.linalg.inv(ridge*np.eye(X.shape[1]) + np.matmul(np.transpose(X),X)),np.transpose(X)),y)
 
 def getPolyfeatures(X,n) :
-    # print(n)
     return np.squeeze(np.transpose(np.array([X**i for i in range(n+1)]))).reshape(-1,n+1)
 
-def getRMSE(ytrue,ypred,lamda=0,w=0) :
-    return np.sqrt((np.sum(np.multiply(ytrue-ypred,ytrue-ypred)) + np.sum(np.multiply(w,w)))/ytrue.shape[0])
+def getRMSE(ytrue,ypred,ridge,w) :
+    return np.sqrt((np.sum(np.multiply(ytrue-ypred,ytrue-ypred)) + ridge*np.sum(np.multiply(w,w)))/ytrue.shape[0])
     
 
 # Seeding
-np.random.seed(10)
+np.random.seed(42)
 
 # Generate 100 points in (0,1)
 X = np.random.uniform(low=0,high=1,size=100).reshape(-1,1)
@@ -38,8 +40,10 @@ y_test = y[train_size+val_size:train_size+val_size+test_size]
 
 # Settings
 degrees = [1,3,6,9]
-ridges = [0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
-sizes = [10,20,40,70]
+ridges = [10**(-17+x) for x in range(18)]
+ridges[0] = 0
+# ridges = [0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
+sizes = [10,20,30, 40, 50, 60, 70]
 all_degrees = np.linspace(0,9,10).astype(int)
 
 # X_train_new = np.array([1,2,3,4])
@@ -48,126 +52,146 @@ all_degrees = np.linspace(0,9,10).astype(int)
 fig = 221
 rmses = []
 
-default = 0
-if default :
-    ridges = [0]
-    sizes = [10]
-    figure = plt.figure()
+# default = 0
+# if default :
+#     ridges = [0]
+#     sizes = [10]
+#     figure = plt.figure()
 
-for degree in degrees : 
-    for ridge in ridges :
-        for size in sizes : 
-            X_train_new = X_train[:size]
-            y_train_new = y_train[:size]
-            X_train_new_poly = getPolyfeatures(X_train_new, degree)
-            w = getWeights(X_train_new_poly, y_train_new, ridge)
-            y_pred_new = getPolyfit(X_train_new_poly,w)
-            rmse_train = getRMSE(y_train_new, y_pred_new)
-            rmse_val = getRMSE(y_val,getPolyfit(getPolyfeatures(X_val,degree),w))
-            rmses.append(np.array([degree, ridge, size, rmse_val]))
+# for degree in degrees : 
+#     for ridge in ridges :
+#         for size in sizes : 
+#             X_train_new = X_train[:size]
+#             y_train_new = y_train[:size]
+#             X_train_new_poly = getPolyfeatures(X_train_new, degree)
+#             w = getWeights(X_train_new_poly, y_train_new, ridge)
+#             y_pred_new = getPolyfit(X_train_new_poly,w)
+#             rmse_train = getRMSE(y_train_new, y_pred_new, ridge, w)
+#             rmse_val = getRMSE(y_val,getPolyfit(getPolyfeatures(X_val,degree),w), ridge, w)
+#             rmses.append(np.array([degree, ridge, size, rmse_val]))
 
-            if default :
-                plt.subplot(fig)
-                fig+=1
-                if fig%2 :
-                    plt.xlabel("x")
-                else :
-                    plt.ylabel("target")
-                plt.plot(X_train_new,y_train_new,'*')
-                x = np.linspace(0,1,100)
-                x_poly = getPolyfeatures(x,degree)
-                y_func = getPolyfit(x_poly,w)
-                np.savetxt("results/coefficients/"+str(degree)+".txt",w,newline=" ")
-                M = "M="+str(degree)
-                plt.plot(x, y_func,label=M)
-                plt.ylim(0, 4)
-                plt.xlim(0,1)
-                plt.legend()
+#             if default :
+#                 plt.subplot(fig)
+#                 fig+=1
+#                 if fig%2 :
+#                     plt.xlabel("x")
+#                 else :
+#                     plt.ylabel("target")
+#                 plt.plot(X_train_new,y_train_new,'*')
+#                 x = np.linspace(0,1,100)
+#                 x_poly = getPolyfeatures(x,degree)
+#                 y_func = getPolyfit(x_poly,w)
+#                 np.savetxt("results/coefficients/"+str(degree)+".txt",w,newline=" ")
+#                 M = "M="+str(degree)
+#                 plt.plot(x, y_func,label=M)
+#                 plt.ylim(0, 4)
+#                 plt.xlim(0,1)
+#                 plt.legend()
 
-                figure.suptitle("Data, Target, Regression Output")
-                plt.savefig("results/targetvsx.png")
+#                 figure.suptitle("Data, Target, Regression Output")
+#                 plt.savefig("results/targetvsx.png")
 
-best_model = rmses[np.argmin(np.array(rmses),axis=0)[-1]]
-print("Parameters of best model has degree {:.2f}, lambda {:.2f}, train size {:.2f}".format(best_model[0],best_model[1],best_model[2]))
+# best_model = rmses[np.argmin(np.array(rmses),axis=0)[-1]]
+# print("Parameters of best model has degree {:.2f}, lambda {:.2f}, train size {:.2f}".format(best_model[0],best_model[1],best_model[2]))
 
-rmse1 = []
-deg1 = []
-rmse2 = []
-deg2 = []
+# rmse1 = []
+# deg1 = []
+# rmse2 = []
+# deg2 = []
 
-for rmse in rmses :
-    if rmse[2] == 10 and rmse[1] !=0 :
-        rmse1.append(rmse[3])
-        deg1.append(rmse[0])
-    if rmse[1] == 0 :
-        rmse2.append(rmse[3])
-        deg2.append(rmse[0])
+# for rmse in rmses :
+#     if rmse[2] == 10 and rmse[1] !=0 :
+#         rmse1.append(rmse[3])
+#         deg1.append(rmse[0])
+#     if rmse[1] == 0 :
+#         rmse2.append(rmse[3])
+#         deg2.append(rmse[0])
 
-plt.rcParams.update({'font.size': 8})
+# plt.rcParams.update({'font.size': 8})
+# plt.subplot(221)
+# xaxis = np.log(np.array(ridges[1:]))
+# for i in range(int(len(rmse1)/xaxis.shape[0])) :
+#     start = i*xaxis.shape[0]
+#     end = start+xaxis.shape[0]
+#     yaxis = rmse1[start : end]
+#     plt.plot(xaxis,yaxis,'-*',label="M="+str(degrees[i]))
 
-plt.subplot(221)
-xaxis = np.log(np.array(ridges[1:]))
-for i in range(int(len(rmse1)/xaxis.shape[0])) :
-    start = i*xaxis.shape[0]
-    end = start+xaxis.shape[0]
-    yaxis = rmse1[start : end]
-    plt.plot(xaxis,yaxis,'-*',label="M="+str(degrees[i]))
+# plt.xlabel(r"$\ln  \lambda $",fontsize=6)
+# plt.ylabel(r"$E_{RMS}$",fontsize=8)
+# plt.title("Val RMS Error vs Ridge Parameter (Train Size 10)",fontsize=8)
+# plt.legend(fontsize=8)
 
-plt.xlabel(r"$\ln  \lambda $",fontsize=6)
-plt.ylabel(r"$E_{RMS}$",fontsize=8)
-plt.title("RMS Error vs Ridge Parameter (Train Size 10)",fontsize=8)
-plt.legend(fontsize=8)
 
-plt.subplot(222)
-xaxis = np.array(sizes)
-for i in range(int(len(rmse2)/xaxis.shape[0])) :
-    start = i*xaxis.shape[0]
-    end = start+xaxis.shape[0]
-    yaxis = rmse2[start : end]
-    plt.plot(xaxis,yaxis,'-*',label="M="+str(degrees[i]))
-plt.xlabel("Train Size",fontsize=8)
-plt.ylabel(r"$E_{RMS}$",fontsize=8)
-plt.title("RMS Error vs Train Size (No reg)",fontsize=8)
-plt.legend(fontsize=8)
+# plt.subplot(222)
+# xaxis = np.array(sizes)
+# for i in range(int(len(rmse2)/xaxis.shape[0])) :
+#     start = i*xaxis.shape[0]
+#     end = start+xaxis.shape[0]
+#     yaxis = rmse2[start : end]
+#     plt.plot(xaxis,yaxis,'-*',label="M="+str(degrees[i]))
+# plt.xlabel("Train Size",fontsize=8)
+# plt.ylabel(r"$E_{RMS}$",fontsize=8)
+# plt.title("Val RMS Error vs Train Size (No reg)",fontsize=8)
+# plt.legend(fontsize=8, loc="upper right")
 
-plt.subplot(223)
+# plt.subplot(223)
 
-size = best_model[2].astype(int)
-ridge = best_model[1]
-degree = best_model[0].astype(int)
+# size = best_model[2].astype(int)
+# ridge = best_model[1]
+# degree = best_model[0].astype(int)
 
-X_train_new = X_train[:size]
-y_train_new = y_train[:size]
-X_train_new_poly = getPolyfeatures(X_train_new, degree)
-w = getWeights(X_train_new_poly, y_train_new, ridge)
-y_pred_new = getPolyfit(X_train_new_poly,w)
-y_pred_test = getPolyfit(getPolyfeatures(X_test,degree),w)
+# X_train_new = X_train[:size]
+# y_train_new = y_train[:size]
+# X_train_new_poly = getPolyfeatures(X_train_new, degree)
+# w = getWeights(X_train_new_poly, y_train_new, ridge)
+# y_pred_new = getPolyfit(X_train_new_poly,w)
+# y_pred_test = getPolyfit(getPolyfeatures(X_test,degree),w)
 
-plt.plot(y_train_new, y_pred_new,"*",label="Train")
-plt.plot(y_test, y_pred_test,"+",label="Test")
-plt.xlabel("True target",fontsize=8)
-plt.ylabel("Model output",fontsize=8)
-plt.legend(fontsize=8)
+# plt.plot(y_train_new, y_pred_new,"*",label="Train")
+# plt.plot(y_test, y_pred_test,"+",label="Test")
+# plt.xlabel("True target",fontsize=8)
+# plt.ylabel("Model output",fontsize=8)
+# # plt.title("Output vs target", fontsize=8)
+# plt.legend(fontsize=8)
 
 ridge = 0
-size = 70
+size = 10
 X_train_new = X_train[:size]
 y_train_new = y_train[:size]
 
 rmse_train = []
 rmse_test = [] 
-
+all_degrees = [9]
 for degree in all_degrees : 
     X_train_new_poly = getPolyfeatures(X_train_new, degree)
-    print(X_train_new_poly.shape)
+    # print(X_train_new_poly.shape)
     w = getWeights(X_train_new_poly, y_train_new, ridge)
     y_pred_new = getPolyfit(X_train_new_poly,w)
-    rmse_train.append(getRMSE(y_train_new, y_pred_new))
-    rmse_test.append(getRMSE(y_test,getPolyfit(getPolyfeatures(X_test,degree),w)))
+    plt.plot(y_pred_new, y_train_new, "*")
+    rmse_train.append(getRMSE(y_train_new, y_pred_new, ridge, w))
+    rmse_test.append(getRMSE(y_test,getPolyfit(getPolyfeatures(X_test,degree),w), ridge, w))
+print(rmse_train)
+print(rmse_test)
+print(w)
 
-plt.subplot(224)
+# plt.subplot(224)
+# plt.tight_layout()
+# plt.plot(all_degrees,rmse_train,"-*",label="Train")
+# plt.plot(all_degrees,rmse_test,"-*",label="Test")
+# plt.legend(fontsize=8,loc="upper right")
+# plt.savefig("results/erms.png")
 
-plt.plot(all_degrees,rmse_train,"-*",label="Train")
-plt.plot(all_degrees,rmse_test,"-*",label="Test")
-plt.savefig("results/erms.png")
+
+# degree = 9
+# X_train_new = np.arange(-int(degree/2),int(degree/2)+2)   
+# y_train_new = (X_train_new+1)**degree
+# ridge = 0
+# X_train_new_poly = getPolyfeatures(X_train_new, degree)
+# w = getWeights(X_train_new_poly, y_train_new, ridge)
+# # print(w)
+# y_pred_new = getPolyfit(X_train_new_poly,w)
+
+# rmse_train = getRMSE(y_train_new, y_pred_new, ridge, w)
+
+# print(rmse_train)
 plt.show()
