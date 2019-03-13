@@ -3,13 +3,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def getPolyfit(X,w) :
+    # print(X.shape, w.shape)
     return np.matmul(X,w)
 
 def getWeights(X,y,ridge) :
+    # print(X.shape, y.shape)
     return np.matmul(np.matmul(np.linalg.inv(ridge*np.eye(X.shape[1]) + np.matmul(np.transpose(X),X)),np.transpose(X)),y)
 
 def getPolyfeatures(X,n) :
-    return np.squeeze(np.transpose(np.array([X**i for i in range(n+1)])))
+    # print(n)
+    return np.squeeze(np.transpose(np.array([X**i for i in range(n+1)]))).reshape(-1,n+1)
 
 def getRMSE(ytrue,ypred,lamda=0,w=0) :
     return np.sqrt((np.sum(np.multiply(ytrue-ypred,ytrue-ypred)) + np.sum(np.multiply(w,w)))/ytrue.shape[0])
@@ -45,7 +48,7 @@ all_degrees = np.linspace(0,9,10).astype(int)
 fig = 221
 rmses = []
 
-default = 1
+default = 0
 if default :
     ridges = [0]
     sizes = [10]
@@ -77,7 +80,7 @@ for degree in degrees :
                 np.savetxt("results/coefficients/"+str(degree)+".txt",w,newline=" ")
                 M = "M="+str(degree)
                 plt.plot(x, y_func,label=M)
-                plt.ylim(0, 5)
+                plt.ylim(0, 4)
                 plt.xlim(0,1)
                 plt.legend()
 
@@ -148,17 +151,23 @@ plt.legend(fontsize=8)
 
 ridge = 0
 size = 70
+X_train_new = X_train[:size]
+y_train_new = y_train[:size]
+
+rmse_train = []
+rmse_test = [] 
+
 for degree in all_degrees : 
-    X_train_new = X_train[:size]
-    y_train_new = y_train[:size]
     X_train_new_poly = getPolyfeatures(X_train_new, degree)
+    print(X_train_new_poly.shape)
     w = getWeights(X_train_new_poly, y_train_new, ridge)
     y_pred_new = getPolyfit(X_train_new_poly,w)
-    rmse_train = getRMSE(y_train_new, y_pred_new)
-    rmse_test = getRMSE(y_test,getPolyfit(getPolyfeatures(X_test,degree),w))
+    rmse_train.append(getRMSE(y_train_new, y_pred_new))
+    rmse_test.append(getRMSE(y_test,getPolyfit(getPolyfeatures(X_test,degree),w)))
 
 plt.subplot(224)
-plt.plot(all_degress,rmse_train,"-*",label="Train")
+
+plt.plot(all_degrees,rmse_train,"-*",label="Train")
 plt.plot(all_degrees,rmse_test,"-*",label="Test")
 plt.savefig("results/erms.png")
 plt.show()

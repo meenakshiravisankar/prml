@@ -234,6 +234,9 @@ np.savetxt('results/accuracy_of_validation_dataset_1',val_accuracies,fmt='%.2f')
 # shuffling
 np.random.shuffle(data2)
 
+train_accuracies = []
+val_accuracies = []
+
 # splitting into train, test, validation - 80, 10, 10 and converting to numpy array
 train_size = int(0.7*data2.shape[0])
 val_size = int(0.15*data2.shape[0])
