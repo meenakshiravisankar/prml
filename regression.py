@@ -45,7 +45,7 @@ all_degrees = np.linspace(0,9,10).astype(int)
 fig = 221
 rmses = []
 
-default = 0
+default = 1
 if default :
     ridges = [0]
     sizes = [10]
@@ -77,6 +77,8 @@ for degree in degrees :
                 np.savetxt("results/coefficients/"+str(degree)+".txt",w,newline=" ")
                 M = "M="+str(degree)
                 plt.plot(x, y_func,label=M)
+                plt.ylim(0, 5)
+                plt.xlim(0,1)
                 plt.legend()
 
                 figure.suptitle("Data, Target, Regression Output")
