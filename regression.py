@@ -254,5 +254,7 @@ plt.title("No regularisation")
 plt.xlabel("x")
 plt.tight_layout()
 # figure.suptitle("Analysis of Overfitting for degree 9")
+plt.savefig("results/overfit.png")
+
 
 plt.show()
