@@ -2,6 +2,7 @@ import numpy as np
 import math
 import random
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 random.seed(42)
 
@@ -22,18 +23,30 @@ def getEmpiricalRisk(y_train, y_pred, w, lamda):
 
 degrees = [1, 5, 9]
 lambdas = [0.001, 0.01, 0.1]
-
+fig = 331
 for d in degrees:
     for myLambda in lambdas:
         empirical_risks = []
+        plt.subplot(fig)
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        plt.title("degree = " + str(d) + ", lambda = " + str(myLambda),fontsize=8)
+        fig+=1
         for i in range(1000):
-            samples = []
             X = np.random.uniform(low=-1,high=1,size=10).reshape(-1,1)
-            y = np.exp(np.tanh(2*math.pi*X)) - X + np.random.normal(0,0.2)
+            noise = np.random.normal(0,np.sqrt(0.2),10).reshape(-1,1)
+            func = np.exp(np.tanh(2*math.pi*X)) - X
+            y = func + noise
+            data = np.append(X,y,axis=1)
+            np.random.shuffle(data)
+            X = data[:,0]
+            y = data[:,1]
             X_poly = getPolyfeatures(X, d)
             w = getWeights(X_poly, y, myLambda)
             y_pred = getPolyfit(X_poly, w)
             er = getEmpiricalRisk(y, y_pred, w, myLambda)
             empirical_risks.append(er)
-        plt.hist(empirical_risks, bins=50,alpha=0.5)
-        plt.show()
+        density = stats.gaussian_kde(empirical_risks)
+        n, curve, _ = plt.hist(empirical_risks, bins=100, alpha=0.5, histtype=u'step', density=True)
+        plt.plot(curve, density(curve))
+plt.suptitle("Empirical risks histogram",fontsize=8)
+plt.savefig("results/degree_vs_lambda")
