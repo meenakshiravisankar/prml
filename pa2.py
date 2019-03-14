@@ -1,6 +1,7 @@
 import numpy as np
 import functions as f
 from scipy.stats import multivariate_normal
+import matplotlib.pyplot as plt 
 
 np.random.seed(seed=42)
 
@@ -79,6 +80,7 @@ def mean(X):
 
 def getCovariance(X1, X2):
     Z = []
+    # print(X1)
     n = len(X1)
     for i in range(n):
         Z.append(X1[i]*X2[i])
@@ -95,33 +97,49 @@ data = np.loadtxt("../Datasets_PRML_A1/Dataset_2_Team_39.csv", delimiter=',', dt
 np.random.shuffle(data)
 
 # splitting into train, test - 80, 20 - and converting to numpy array
-train_size = int(0.8*data.shape[0])
-test_size = int(0.2*data.shape[0])
-
-X_train = data[:train_size,:2]
-y_train = data[:train_size,-1]
-
+train_size = int(0.85*data.shape[0])
+test_size = int(0.15*data.shape[0])
+data_train = data[:train_size,:]
 X_test = data[train_size:train_size+test_size,:2]
 y_test = data[train_size:train_size+test_size,-1]
 
-dataset_sizes = [100, 500, 1000, 2000, 4000]
-#dataset_sizes = np.linspace(100,4000,39).astype(int)
+# X_train = data[:train_size,:2]
+# y_train = data[:train_size,-1]
+dataset_sizes = [50,100, 200, 500, 1000, 2000, 3000]
 
 lossfunction = np.array([[0,1,2],[1,0,1],[2,1,0]])
 
+yerr = np.zeros((2,len(dataset_sizes)))
+idx = 0
 accuracies = []
 for ds in dataset_sizes:
     # 20 replications
     test_accuracy = []
     for i in range(20):
-        X = X_train[:ds]
-        y = y_train[:ds]
+        np.random.shuffle(data_train)
+        X = data_train[:ds,:2]
+        y = data_train[:ds,-1]
         classes, prior = getPrior(y)
         means = np.array(getMLE(X, y))
         cov_rand = getCompleteCovMatrix(X, y)
         train_pred, train_acc =  getModel(X, y, means, cov_rand, lossfunction, prior, "bayes", "diff")
         test_pred, test_acc =  getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "diff")
         test_accuracy.append(test_acc)
+
+    yerr[0][idx] = np.abs(np.min(test_accuracy)-mean(test_accuracy))
+    yerr[1][idx] = np.abs(np.max(test_accuracy)-mean(test_accuracy))
+    idx+=1
     accuracies.append(mean(test_accuracy))
 
-print(accuracies)
+# print(yerr)
+dataset_sizes = np.array(dataset_sizes)
+yerr = np.array(yerr)
+accuracies = np.array(accuracies)
+print(yerr.shape, dataset_sizes.shape)
+# print(dataset_sizes)
+# print(accuracies)
+print(dataset_sizes, accuracies, yerr)
+plt.plot(dataset_sizes, accuracies,'*')
+# print(dataset_sizes.shape, accuracies.shape, yerr.shape)
+plt.errorbar(dataset_sizes, accuracies, yerr)
+plt.show()
