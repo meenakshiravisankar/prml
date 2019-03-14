@@ -7,6 +7,9 @@ from sklearn.model_selection import train_test_split
 
 # warnings.filterwarnings("ignore")
 
+def getFunc(X) :
+    return np.exp(np.sin(2*np.pi*X)) + X
+
 def getPolyfit(X,w) :
     return np.matmul(X,w)
 
@@ -40,7 +43,7 @@ y = np.ndarray(shape=(100,1),dtype=np.float64)
 # Generate 100 points in (0,1)
 X = np.random.uniform(low=0,high=1,size=100).reshape(100,1)
 noise = np.random.normal(0,np.sqrt(0.1),100).reshape(100,1)
-func = np.exp(np.sin(2*np.pi*X)) + X
+func = getFunc(X)
 y = func + noise
 
 # Shuffling data
@@ -101,14 +104,19 @@ for degree in degrees :
 
                 # Training data
                 plt.plot(X_train_new,y_train_new,'.')
+                
                 # Curve fit
                 x = np.linspace(0,1,100)
+                y_func = getFunc(x)
+                plt.plot(x,y_func,label="target")
                 x_poly = getPolyfeatures(x,degree)
                 y_func = getPolyfit(x_poly,w)
                 # Coefficients
-                np.savetxt("results/coefficients/"+str(degree)+".txt",w,newline=" ")
+                np.savetxt("results/coefficients/noreg/"+str(degree)+".txt",w,newline=" ")
                 M = "M="+str(degree)
                 plt.plot(x, y_func,label=M)
+                plt.xlim(0,1)
+                plt.ylim(0,3)
                 plt.legend()
                 figure.suptitle("Data, Target, Regression Output (without regularisation)")
                 plt.savefig("results/targetvsx.png")
@@ -209,6 +217,8 @@ plt.tight_layout()
 plt.plot(all_degrees,rmse_train,"-*",label="Train")
 plt.plot(all_degrees,rmse_test,"-*",label="Test")
 plt.legend(fontsize=8,loc="upper right")
+plt.xlabel("Degree",fontsize=8)
+plt.ylabel(r"$E_{RMS}$",fontsize=8)
 plt.savefig("results/erms.png")
 
 
@@ -217,44 +227,75 @@ figure = plt.figure()
 degree = 9
 size = 10
 
-plt.subplot(231)
+plt.subplot(221)
 x = np.linspace(0,1,100)
 x_poly = getPolyfeatures(x,degree)
-plt.plot(X_train_new,y_train_new,'.')
-# with ridge regression for 9th degree polynomial
-X_train_new = X_train[:size]
-y_train_new = y_train[:size]
-w, y_pred_new, rmse = getResults(X_train_new, y_train_new, degree, best_ridge)
-y_func = getPolyfit(x_poly,w)
-plt.plot(x, y_func)
-plt.title(r'$\lambda=$'+str(best_ridge))
-plt.ylabel("target")
-plt.tight_layout()
-
-plt.subplot(232)
-# with regularisation using large train size for 9th degree polynomial
-X_train_new = X_train[:int(best_size)]
-y_train_new = y_train[:int(best_size)]
-plt.plot(X_train_new,y_train_new,'.')
-w, y_pred_new, rmse = getResults(X_train_new, y_train_new, degree, 0)
-y_func = getPolyfit(x_poly,w)
-plt.plot(x, y_func)
-plt.title("Train size - "+str(int(best_size)))
-plt.tight_layout()
-
-plt.subplot(233)
 # without regularisation for 9th degree polynomial
 X_train_new = X_train[:10]
 y_train_new = y_train[:10]
 plt.plot(X_train_new,y_train_new,'.')
 w, y_pred_new, rmse = getResults(X_train_new, y_train_new, degree, 0)
 y_func = getPolyfit(x_poly,w)
-plt.plot(x, y_func)
+plt.plot(x, y_func,label="output")
 plt.title("No regularisation")
-plt.xlabel("x")
+y_func = getFunc(x)
+plt.plot(x,y_func,label="target")
 plt.tight_layout()
+plt.ylabel("y")
+plt.legend()
+
+plt.subplot(223)
+
+plt.plot(X_train_new,y_train_new,'.')
+# with ridge regression for 9th degree polynomial
+X_train_new = X_train[:size]
+y_train_new = y_train[:size]
+w, y_pred_new, rmse = getResults(X_train_new, y_train_new, degree, best_ridge)
+y_func = getPolyfit(x_poly,w)
+np.savetxt("results/coefficients/lowreg/"+str(degree)+".txt",w,newline=" ")
+plt.plot(x, y_func,label="output")
+plt.title(r'$\lambda=$'+str(best_ridge))
+y_func = getFunc(x)
+plt.plot(x,y_func,label="target")
+plt.tight_layout()
+plt.ylabel("y")
+plt.xlabel("x")
+plt.legend()
+
+plt.subplot(222)
+# with regularisation using large train size for 9th degree polynomial
+X_train_new = X_train[:int(best_size)]
+y_train_new = y_train[:int(best_size)]
+plt.plot(X_train_new,y_train_new,'.')
+w, y_pred_new, rmse = getResults(X_train_new, y_train_new, degree, 0)
+y_func = getPolyfit(x_poly,w)
+plt.plot(x, y_func,label="output")
+plt.title("Train size - "+str(int(best_size)))
+y_func = getFunc(x)
+plt.plot(x,y_func,label="target")
+plt.tight_layout()
+plt.legend()
+
+
+
+plt.subplot(224)
+# high regularisation for 9th degree polynomial
+X_train_new = X_train[:10]
+y_train_new = y_train[:10]
+plt.plot(X_train_new,y_train_new,'.')
+w, y_pred_new, rmse = getResults(X_train_new, y_train_new, degree, 1)
+y_func = getPolyfit(x_poly,w)
+np.savetxt("results/coefficients/highreg/"+str(degree)+".txt",w,newline=" ")
+plt.plot(x, y_func,label="output")
+plt.title(r'$\lambda=$'+str(1))
+plt.xlabel("x")
+y_func = getFunc(x)
+plt.plot(x,y_func,label="target")
+plt.tight_layout()
+plt.legend()
+
 # figure.suptitle("Analysis of Overfitting for degree 9")
-plt.savefig("results/overfit.png")
+plt.savefig("results/fitting.png")
 
 
 plt.show()
