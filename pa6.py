@@ -16,10 +16,13 @@ def getWeights(X,y,ridge) :
     return np.matmul(np.matmul(np.linalg.inv(ridge*np.eye(X.shape[1]) + np.matmul(np.transpose(X),X)),np.transpose(X)),y)
 
 def getEmpiricalRisk(y_train, y_pred, w, lamda):
+    n = y_train.shape[0]
     diff = y_train - y_pred
     ridge = lamda * sum(w*w)
     sqd = np.squeeze(np.array([x*x for x in diff]))
-    return (sum(sqd) + ridge)
+    error = sum(sqd) + ridge
+    emp_risk = np.sqrt((2.0*error)/n)
+    return emp_risk
 
 degrees = [1, 5, 9]
 lambdas = [0.001, 0.01, 0.1]
