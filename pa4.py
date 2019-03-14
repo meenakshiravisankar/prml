@@ -21,12 +21,12 @@ fig = 221
 for factor in factors:
     mu_n = []
     sigma_estimates = []
-    
+
     plt.subplot(fig)
     plt.tight_layout()
     plt.title(r'$\frac{\sigma^2}{\sigma^2_{0}}=$'+str(factor),fontsize=8)
     fig+=1
-    
+
     for n in dataset_sizes:
         np.random.shuffle(data)
         X = data[0:n]
@@ -35,16 +35,10 @@ for factor in factors:
         mu = (Sn + mu0*factor) / (n + factor)
         mu_n.append(mu)
 
-        # Now that we know mu, we can do either ML estimate or Bayesian estimate of sigma.
-        # ML estimate of sigma is simply (Sn2 - 2*Sn*mu + mu*mu) / n .
-        # After doing Bayesian estimate with MLE of sigma as the prior, we get posterior to be:
-        sigma = (Sn2 - 2*Sn*mu + mu*mu) / (n + 2)
-        # This is almost same as ML estimate, except that it is n+2 in the denominator, instead of n.
-        # So for large n, this doesn't make any difference.
-        # Of course, one reason for this is that we chose a uniform prior for sigma.
-        # I chose the ML estimate of sigma as its uniform prior for Bayesian estimation for convenience :P
+        # ML estimate of sigma
+        sigma = (Sn2 - 2*Sn*mu + mu*mu) / n
         sigma_estimates.append(sigma)
-  
+
     for i in range(3):
         labelname = "n = " + str(dataset_sizes[i])
         plt.plot(x_plot, stats.norm.pdf(x_plot, mu_n[i], sigma_estimates[i]), label = labelname)
