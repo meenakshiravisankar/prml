@@ -21,7 +21,7 @@ def getEmpiricalRisk(y_train, y_pred, w, lamda):
     ridge = lamda * sum(w*w)
     sqd = np.squeeze(np.array([x*x for x in diff]))
     error = sum(sqd) + ridge
-    emp_risk = np.sqrt((2.0*error)/n)
+    emp_risk = (error+0.0)/n
     return emp_risk
 
 degrees = [1, 5, 9]

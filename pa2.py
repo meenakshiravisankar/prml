@@ -1,7 +1,7 @@
 import numpy as np
 import functions as f
 from scipy.stats import multivariate_normal
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 np.random.seed(seed=42)
 
@@ -142,4 +142,7 @@ print(dataset_sizes, accuracies, yerr)
 plt.plot(dataset_sizes, accuracies,'*')
 # print(dataset_sizes.shape, accuracies.shape, yerr.shape)
 plt.errorbar(dataset_sizes, accuracies, yerr)
+plt.xlabel("Dataset sizes")
+plt.ylabel("Accuracies")
+plt.savefig("results/q2.png")
 plt.show()
