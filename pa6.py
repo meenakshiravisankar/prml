@@ -70,6 +70,8 @@ for d in degrees:
         # plotting the histogram outline and the smooth curve corresponding to it
         density = stats.gaussian_kde(empirical_risks)
         n, curve, _ = plt.hist(empirical_risks, bins=100, alpha=0.5, histtype=u'step', density=True)
+        plt.ylim(top=10)
+        plt.xlim(right=1.0)
         plt.plot(curve, density(curve))
 plt.suptitle("Empirical risks histogram",fontsize=8)
 plt.savefig("results/degree_vs_lambda")
