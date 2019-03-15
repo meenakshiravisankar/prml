@@ -117,7 +117,6 @@ for ds in dataset_sizes:
     for i in range(20):
         np.random.shuffle(data_train)
         X = data_train[:ds,:2]
-        print(X.shape)
         y = data_train[:ds,-1].reshape(-1,1)
         classes, prior = getPrior(y)
         means = np.array(getMLE(X, y))
