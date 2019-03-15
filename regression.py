@@ -28,6 +28,7 @@ def getRMSE(ytrue,ypred,ridge,w) :
     
 def getResults(X,y,degree,ridge) :
     X = getPolyfeatures(X, degree)
+    print("shape is", X.shape)
     w = getWeights(X, y, ridge)
     y_pred = getPolyfit(X,w)
     rmse = getRMSE(y,y_pred,ridge,w)

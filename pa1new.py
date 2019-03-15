@@ -116,6 +116,7 @@ def getCompleteCovMatrix(X, y):
 data1 = np.loadtxt("../Datasets_PRML_A1/Dataset_1_Team_39.csv", delimiter=',', dtype=None)
 data2 = np.loadtxt("../Datasets_PRML_A1/Dataset_2_Team_39.csv", delimiter=',', dtype=None)
 
+
 best_model_1 = [0]
 best_model_2 = [0]
 
@@ -135,6 +136,13 @@ y_val = data1[train_size:train_size+val_size,-1]
 
 X_test = data1[train_size+val_size:train_size+val_size+test_size,:2]
 y_test = data1[train_size+val_size:train_size+val_size+test_size,-1]
+
+
+mini = np.min(X_train, axis=0)
+maxi = np.max(X_train, axis=0)
+
+def getSurfacePlot()
+
 
 print("Dataset 1")
 print("Size of train, validation and test sets",X_train.shape,X_val.shape,X_test.shape)

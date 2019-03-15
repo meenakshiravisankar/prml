@@ -37,11 +37,18 @@ def getEmpiricalRisk(y_train, y_pred):
     return sum(sqd)
 
 def kmeans(dataset, k):
-    kmeans = KMeans(n_clusters=k, random_state=0).fit(dataset)
+    kmeans = KMeans(n_clusters=k, random_state=42).fit(dataset)
     return kmeans.cluster_centers_
 
+# Loading dataset
 data = np.loadtxt("../Datasets_PRML_A1/train100.txt", delimiter=' ', dtype=None)
-
+np.random.shuffle(data)
+# Settings
+degrees = [1,3,6,9]
+ridges = [10**(-13+x) for x in range(14)]
+ridges[0] = 0
+sizes = [10,20,30,40,50,60,70]
+variances = []
 num_gauss = [5]
 
 for k in num_gauss:

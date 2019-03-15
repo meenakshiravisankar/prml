@@ -21,6 +21,7 @@ rv = multivariate_normal([mu_x, mu_y], [[variance_x, 0], [0, variance_y]])
 #Make a 3D plot
 fig = plt.figure()
 ax = fig.gca(projection='3d')
+print(rv.pdf(pos).shape)
 ax.plot_surface(X, Y, rv.pdf(pos),cmap='viridis',linewidth=0)
 ax.set_xlabel('X axis')
 ax.set_ylabel('Y axis')
