@@ -1,4 +1,4 @@
-import numpy as np 
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy import linalg
@@ -25,7 +25,7 @@ def getPolyfeatures(X,n) :
 
 def getRMSE(ytrue,ypred,ridge,w) :
     return np.sqrt((np.sum(np.multiply(ytrue-ypred,ytrue-ypred)) + ridge*np.sum(np.multiply(w,w)))/ytrue.shape[0])
-    
+
 def getResults(X,y,degree,ridge) :
     X = getPolyfeatures(X, degree)
     w = getWeights(X, y, ridge)
@@ -81,10 +81,10 @@ if default :
     sizes = [10]
     figure = plt.figure()
 
-for degree in degrees : 
+for degree in degrees :
     for ridge in ridges :
-        for size in sizes : 
-            X_train_new = X_train[:size]            
+        for size in sizes :
+            X_train_new = X_train[:size]
             y_train_new = y_train[:size]
             # X_train_new_poly = getPolyfeatures(X_train_new, degree)
             # w = getWeights(X_train_new_poly, y_train_new, ridge)
@@ -104,7 +104,7 @@ for degree in degrees :
 
                 # Training data
                 plt.plot(X_train_new,y_train_new,'.')
-                
+
                 # Curve fit
                 x = np.linspace(0,1,100)
                 y_func = getFunc(x)
@@ -205,9 +205,9 @@ X_train_new = X_train[:size]
 y_train_new = y_train[:size]
 
 rmse_train = []
-rmse_test = [] 
+rmse_test = []
 
-for degree in all_degrees : 
+for degree in all_degrees :
     w, y_pred_new, rmse = getResults(X_train_new, y_train_new, degree, ridge)
     rmse_train.append(rmse)
     rmse_test.append(getRMSE(y_test,getPolyfit(getPolyfeatures(X_test,degree),w), ridge, w))
