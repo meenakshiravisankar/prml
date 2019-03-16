@@ -1,8 +1,9 @@
 import numpy as np
-from scipy.stats import multivariate_normal
+# from scipy.stats import multivariate_normal
 from sklearn.metrics import confusion_matrix
 import confusion_matrix as cf_mat
 import matplotlib.pyplot as plt
+import math
 
 # returns prior class probabilities
 def getPrior(y) :
@@ -28,22 +29,26 @@ def getConditionalSameCov(X, mu, sigma, mode):
         if mode == "naive" :
             value = 1
             for feature in range(mu.shape[1]) :
-                value *= (multivariate_normal.pdf(X[:,feature],mean=mu[class_val][feature],cov=sigma[feature][feature], allow_singular=True))
+                #value *= (multivariate_normal.pdf(X[:,feature],mean=mu[class_val][feature],cov=sigma[feature][feature]))
+                value *= (uvNormal(X[:,feature],mu[class_val][feature],sigma[feature][feature]))
         else :
-            value =  multivariate_normal.pdf(X,mean=mu[class_val],cov=sigma, allow_singular=True)
+            #value =  multivariate_normal.pdf(X,mean=mu[class_val],cov=sigma)
+            value =  mvNormal(X,mu[class_val],sigma)
         prob.append(value)
     return np.transpose(np.array(prob))
 
-# claculates class conditional density for the case of different covariance for each class
+# calculates class conditional density for the case of different covariance for each class
 def getConditionalDiffCov(X, mu, sigma, mode):
     prob = []
     for class_val in range(mu.shape[0]) :
         if mode == "naive" :
             value = 1
             for feature in range(mu.shape[1]) :
-                value *= (multivariate_normal.pdf(X[:,feature],mean=mu[class_val][feature],cov=sigma[class_val][feature][feature], allow_singular=True))
+                #value *= (multivariate_normal.pdf(X[:,feature],mean=mu[class_val][feature],cov=sigma[class_val][feature][feature]))
+                value *= (uvNormal(X[:,feature],mu[class_val][feature],sigma[class_val][feature][feature]))
         else :
-            value =  multivariate_normal.pdf(X,mean=mu[class_val],cov=sigma[class_val], allow_singular=True)
+            #value =  multivariate_normal.pdf(X,mean=mu[class_val],cov=sigma[class_val])
+            value =  mvNormal(X,mu[class_val],sigma[class_val])
         prob.append(value)
     return np.transpose(np.array(prob))
 
@@ -95,3 +100,27 @@ def getCompleteCovMatrix(X, y):
     for class_val in unique :
         covs.append(getCovMatrix(np.transpose(X[np.where(y==class_val)])))
     return covs
+
+def eval1DGaussian(X, mu, sigma):
+    power = (-0.5 * ((X-mu) * (X-mu))) / sigma
+    factor = 1/(math.sqrt(2 * math.pi * sigma))
+    value = factor * math.exp(power)
+    return value
+
+def uvNormal(X, mu, sigma):
+    gauss1D = [eval1DGaussian(x, mu, sigma) for x in X]
+    return np.array(gauss1D)
+
+def evalNDGaussian(X, mu, sigma):
+    #X = np.transpose(X[np.newaxis])
+    n = X.shape[0]
+    det = np.linalg.det(sigma)
+    det_sqr = math.sqrt(det)
+    sigma_inv = np.linalg.inv(sigma)
+    exponent = (-0.5) * np.matmul(np.matmul((X - mu),sigma_inv),np.transpose(X - mu))
+    factor = math.sqrt((2 * math.pi)**n) * det_sqr
+    return np.array(math.exp(exponent)/factor)
+
+def mvNormal(X, mu, sigma):
+    gaussND = [evalNDGaussian(x, mu, sigma) for x in X]
+    return np.array(gaussND)
