@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from sklearn.metrics import confusion_matrix
 import confusion_matrix as cf_mat
 import matplotlib.pyplot as plt
-
+from matplotlib import cm
 np.random.seed(seed=42)
 
 # Compute class prior
@@ -37,7 +37,6 @@ def getConditionalSameCov(X, mu, sigma, mode):
             value =  multivariate_normal.pdf(X,mean=mu[class_val],cov=sigma)
         prob.append(value)
     return np.transpose(np.array(prob))
-
 
 # Compute class conditional density where covariance is different for all classes
 def getConditionalDiffCov(X, mu, sigma, mode):
@@ -163,18 +162,25 @@ test_size = int(0.15*data1.shape[0])
 X_train = data1[:train_size,:2]
 y_train = data1[:train_size,-1]
 
+mu = np.mean(X_train,axis=0)
+diff = X_train - mu
+sigma = np.mean(diff**2,axis=0)
+mu_x = sigma[0]
+mu_y = sigma[1]
+mu_xy = np.multiply(diff[0],diff[1])/(X_train.shape[0])
+print(mu_x, mu_xy, mu_y)
+# print(np.array([[mu_x,mu_xy],[mu_xy,mu_y]]))
+
+# print(np.cov(np.array(X_train)).shape)
+
 X_val = data1[train_size:train_size+val_size,:2]
 y_val = data1[train_size:train_size+val_size,-1]
 
 X_test = data1[train_size+val_size:train_size+val_size+test_size,:2]
 y_test = data1[train_size+val_size:train_size+val_size+test_size,-1]
 
-
 mini = np.min(X_train, axis=0)
 maxi = np.max(X_train, axis=0)
-
-
-
 
 print("Dataset 1")
 print("Size of train, validation and test sets",X_train.shape,X_val.shape,X_test.shape)
@@ -199,7 +205,6 @@ if best_model_1[0] < accuracy :
     best_model_1 = [accuracy, "naive", "same covariance - identity"]
 prediction, accuracy =  getModel(X_test, y_test, means, np.eye(2), lossfunction, prior, "naive", "same")
 print("Test accuracy {:.2f}".format(accuracy))
-# getConfusion(y_test,prediction, "Model 1 Dataset 1")
 
 print("\n")
 
@@ -216,48 +221,51 @@ if best_model_1[0] < accuracy :
 prediction, accuracy =  getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive", "same")
 print("Test accuracy {:.2f}".format(accuracy))
 
-fig = plt.figure()
-# ax = fig.gca(projection='3d')
+surface_plot = 0
+contour_plot = 0
+if  surface_plot :
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
 
-# Train scatter plot
-plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
-plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='b',label="class 1")
-plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='g',label="class 2")
-# plt.show()
+    # Surface plot for class conditional density
+    getSurfacePlot(mini,maxi,means[0,:],cov_rand,"Reds", fig)
+    getSurfacePlot(mini,maxi,means[1,:],cov_rand,"Blues", fig)
+    getSurfacePlot(mini,maxi,means[2,:],cov_rand,"Greens", fig)
+    plt.savefig("results/q11density.png")
+    plt.show()
 
-# Surface plot for class conditional density
-# x,y,z = getSurfacePlot(mini,maxi,means[0,:],cov_rand,"Reds", fig)
-# x,y,z = getSurfacePlot(mini,maxi,means[1,:],cov_rand,"Blues", fig)
-# x,y,z = getSurfacePlot(mini,maxi,means[2,:],cov_rand,"Greens", fig)
-# plt.savefig("results/q11density.png")
-# plt.show()
+if contour_plot :
+    fig = plt.figure()
+    # Train scatter plot
+    plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
+    plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='b',label="class 1")
+    plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='g',label="class 2")
+    
+    # Contour plots
+    x,y,z = getContour(mini,maxi,means[0,:],cov_rand,"Reds", fig)
+    plt.contour(x,y,z,colors=['red'])
+    x,y,z = getContour(mini,maxi,means[1,:],cov_rand,"Blues", fig)
+    plt.contour(x,y,z,colors=['blue'])
+    x,y,z = getContour(mini,maxi,means[2,:],cov_rand,"Greens", fig)
+    plt.contour(x,y,z,colors=['green'])
+    
+    print(cov_rand)
+    # Eigen values
+    # for i in classes :
+    #     i = int(i)
+    #     w, v = np.linalg.eig(cov_rand)
+    #     plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=3)
+    #     plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=8)
+    # plt.xlabel("x1")
+    # plt.ylabel("x2")
+    # plt.title("Best model on dataset 1 - Naive with same covariance")
+    # plt.legend(loc="lower right")
+    # plt.savefig("results/q11contour.png")
+    plt.show()
 
-# Contour plots
-# plt.figure()
-# x,y,z = getContour(mini,maxi,means[0,:],cov_rand,"Reds", fig)
-# plt.contour(x,y,z,colors=['red'])
-# x,y,z = getContour(mini,maxi,means[1,:],cov_rand,"Blues", fig)
-# plt.contour(x,y,z,colors=['blue'])
-# x,y,z = getContour(mini,maxi,means[2,:],cov_rand,"Greens", fig)
-# plt.contour(x,y,z,colors=['green'])
-
-# # # Eigen values
-
-# for i in classes :
-#     i = int(i)
-#     w, v = np.linalg.eig(cov_rand)
-#     plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=3)
-#     plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=8)
-# plt.xlabel("x1")
-# plt.ylabel("x2")
-# plt.title("Best model on dataset 1 - Naive with same covariance")
-# plt.legend(loc="lower right")
-# plt.savefig("results/q11contour.png")
-# plt.show()
-
-# plt.figure()
-# plt.quiver(1,1,0.5,0.5,scale=0.001)
-# plt.show()
+    # plt.figure()
+    # plt.quiver(1,1,0.5,0.5,scale=0.001)
+    # plt.show()
 # plt.subplot(121)
 # getConfusion(y_test,prediction, "Model 2 Dataset 1")
 
@@ -411,50 +419,50 @@ plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='g',label="clas
 
 # print("\n")
 
-print("Model 5 - Bayes and covariance is different")
-cov_rand = getCompleteCovMatrix(X_train, y_train)
-prediction, accuracy =  getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "diff")
-train_accuracies.append(accuracy)
-print("Train accuracy {:.2f}".format(accuracy))
-prediction, accuracy =  getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "diff")
-print("Validation accuracy {:.2f}".format(accuracy))
-val_accuracies.append(accuracy)
-if best_model_2[0] < accuracy :
-    best_model_2 = [accuracy, "bayes", "different covariance"]
-prediction, accuracy =  getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "diff")
-print("Test accuracy {:.2f}".format(accuracy))
+# print("Model 5 - Bayes and covariance is different")
+# cov_rand = getCompleteCovMatrix(X_train, y_train)
+# prediction, accuracy =  getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "diff")
+# train_accuracies.append(accuracy)
+# print("Train accuracy {:.2f}".format(accuracy))
+# prediction, accuracy =  getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "diff")
+# print("Validation accuracy {:.2f}".format(accuracy))
+# val_accuracies.append(accuracy)
+# if best_model_2[0] < accuracy :
+#     best_model_2 = [accuracy, "bayes", "different covariance"]
+# prediction, accuracy =  getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "diff")
+# print("Test accuracy {:.2f}".format(accuracy))
 # # plt.subplot(122)
 # # getConfusion(y_test,prediction, "Model 5 Dataset 2")
 
 # fig = plt.figure()
-cov_rand = np.array(cov_rand)
+# cov_rand = np.array(cov_rand)
 # # getSurfacePlot(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
 # # getSurfacePlot(mini,maxi,means[1,:],cov_rand[1,:,:],"Blues", fig)
 # # getSurfacePlot(mini,maxi,means[2,:],cov_rand[2,:,:],"Greens", fig)
 # # plt.savefig("results/q12density.png")
 # # plt.show()
 
-x,y,z = getContour(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
-plt.contour(x,y,z,colors=['red'])
-x,y,z = getContour(mini,maxi,means[1,:],cov_rand[1,:,:],"Blues", fig)
-plt.contour(x,y,z,colors=['blue'])
-x,y,z = getContour(mini,maxi,means[2,:],cov_rand[2,:,:],"Greens", fig)
-plt.contour(x,y,z,colors=['green'])
+# x,y,z = getContour(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
+# plt.contour(x,y,z,colors=['red'])
+# x,y,z = getContour(mini,maxi,means[1,:],cov_rand[1,:,:],"Blues", fig)
+# plt.contour(x,y,z,colors=['blue'])
+# x,y,z = getContour(mini,maxi,means[2,:],cov_rand[2,:,:],"Greens", fig)
+# plt.contour(x,y,z,colors=['green'])
 
-# # Eigen values
-print(cov_rand)
-for i in classes :
-    i = int(i)
-    w, v = np.linalg.eig(cov_rand[i,:,:])
-    plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=3)
-    plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=8)
-    print(v)
-plt.xlabel("x1")
-plt.ylabel("x2")
-plt.title("Best model on dataset 2 - Bayes with different covariance")
-plt.legend(loc="lower right")
-plt.savefig("results/q12contour.png")
-plt.show()
+# # # Eigen values
+# print(cov_rand)
+# for i in classes :
+#     i = int(i)
+#     w, v = np.linalg.eig(cov_rand[i,:,:])
+#     plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=3)
+#     plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=8)
+#     print(v)
+# plt.xlabel("x1")
+# plt.ylabel("x2")
+# plt.title("Best model on dataset 2 - Bayes with different covariance")
+# plt.legend(loc="lower right")
+# plt.savefig("results/q12contour.png")
+# plt.show()
 
 # print("\n")
 
