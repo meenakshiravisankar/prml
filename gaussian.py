@@ -65,9 +65,11 @@ if default :
     ridges = [0]
     sigmas = [1]
 emrs = 1
+ridge_go = 0
+go = 1
 if emrs :
-    clusters = [10,20,30,40,50,60,70,80]
-    ridges = [0]
+    clusters = [10,30,60,70,80]
+    ridges = [0] # 0.001 and 0
     sigmas = [2]
 
 train_rmses = []
@@ -94,9 +96,14 @@ val_rmses = np.array(val_rmses)
 scores = val_rmses[:,-1].reshape(-1,1)
 best_model = val_rmses[np.argmin(scores,axis=0)[0]]
 if emrs :
-    np.savetxt("results/q7/ermstrain"+str(X_train.shape[0])+".txt", train_rmses, fmt="%.2f")
-    np.savetxt("results/q7/ermstest"+str(X_train.shape[0])+".txt", test_rmses, fmt="%.2f")
-    np.savetxt("results/q7/ermsval"+str(X_train.shape[0])+".txt", val_rmses, fmt="%.2f")
+    if ridge_go :
+        np.savetxt("results/q7/ermsridgetrain"+str(X_train.shape[0])+".txt", train_rmses, fmt="%.2f")
+        np.savetxt("results/q7/ermsridgetest"+str(X_train.shape[0])+".txt", test_rmses, fmt="%.2f")
+        np.savetxt("results/q7/ermsridgeval"+str(X_train.shape[0])+".txt", val_rmses, fmt="%.2f")
+    if go :
+        np.savetxt("results/q7/ermstrain"+str(X_train.shape[0])+".txt", train_rmses, fmt="%.2f")
+        np.savetxt("results/q7/ermstest"+str(X_train.shape[0])+".txt", test_rmses, fmt="%.2f")
+        np.savetxt("results/q7/ermsval"+str(X_train.shape[0])+".txt", val_rmses, fmt="%.2f")
 
 print("Parameters of best model are cluster, lambda, sigma",best_model[0],best_model[1],best_model[2])
 
