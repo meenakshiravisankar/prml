@@ -41,6 +41,8 @@ def getResults(X,y,mu,sigma,ridge) :
 np.random.seed(42)
 
 data100 = np.loadtxt("../Datasets_PRML_A1/train100.txt", delimiter=' ', dtype=None)
+# data1000 = np.loadtxt("../Datasets_PRML_A1/train1000.txt", delimiter=' ', dtype=None)
+
 data2 = np.loadtxt("../Datasets_PRML_A1/val.txt", delimiter=' ', dtype=None)
 data3 = np.loadtxt("../Datasets_PRML_A1/test.txt", delimiter=' ', dtype=None)
 
@@ -53,6 +55,9 @@ y_val = data2[:,-1]
 X_test = data3[:,:2]
 y_test = data3[:,-1]
 
+mini = np.min(X_train,axis=0)-1
+maxi = np.max(X_train,axis=0)+1
+
 # Settings 
 clusters = [2,4,10,20,30,40,50,60]
 ridges = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
@@ -60,13 +65,14 @@ sigmas = [0.1,1,2]
 ridges[0] = 0
 
 default = 0
+emrs = 0
+ridge_go = 0
+go = 0
+
 if default :
     clusters = [60]
     ridges = [0]
-    sigmas = [1]
-emrs = 1
-ridge_go = 0
-go = 1
+    sigmas = [2]
 if emrs :
     clusters = [10,30,60,70,80]
     ridges = [0] # 0.001 and 0
@@ -107,11 +113,12 @@ if emrs :
 
 print("Parameters of best model are cluster, lambda, sigma",best_model[0],best_model[1],best_model[2])
 
+cluster = int(best_model[0])
+ridge = best_model[1]
+sigma = best_model[2]
+
 scatter_plot = 0
-if scatter_plot :
-    cluster = int(best_model[0])
-    ridge = best_model[1]
-    sigma = best_model[2]
+if scatter_plot :   
     mu = kmeans(X_train,cluster)
     w, y_pred, rmse = getResults(X_train,y_train,mu,sigma,ridge)
     fig = plt.figure()
@@ -124,8 +131,40 @@ if scatter_plot :
     plt.savefig("results/q7scatter.png")
     plt.legend()
     plt.show()
-# mini = np.min(X_train,axis=0)-1
-# maxi = np.max(X_train,axis=0)+1
+
+function_plot = 1
+if function_plot :
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    mu = kmeans(X_train,cluster)
+    w, y_pred, rmse = getResults(X_train,y_train,mu,sigma,ridge)
+
+    x = np.arange(mini[0],maxi[0],0.1)
+    y = np.arange(mini[1],maxi[1],0.1)
+    X, Y = np.meshgrid(x, y)
+    X_data = []
+
+    for x,y in zip(np.ravel(X), np.ravel(Y)) :
+        X_data.append(np.array([x,y]))
+    X_data = np.array(X_data)
+    y_data = np.zeros(X_data.shape[0])
+
+    zs = getGaussianBasis(X_data, mu, sigma)
+    zs = getPolyfit(zs,w)
+    print(zs.shape)
+    # zs = np.array([fun(x,y) for x,y in zip(np.ravel(X), np.ravel(Y))])
+    # Z = zs.reshape(X.shape)
+
+    # ax.plot_surface(X, Y, Z)
+    # ax.scatter(X_train[:,0],X_train[:,1],y_train,c='b')
+
+    # ax.set_xlabel('X Label')
+    # ax.set_ylabel('Y Label')
+    # ax.set_zlabel('Z Label')
+
+    # plt.show()
+
 
 
 # xy = np.mgrid[mini[0]:maxi[0]:0.1, mini[1]:maxi[1]:0.1].reshape(2,-1)
