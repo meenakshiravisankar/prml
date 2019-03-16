@@ -42,14 +42,15 @@ np.random.seed(42)
 
 data100 = np.loadtxt("../Datasets_PRML_A1/train100.txt", delimiter=' ', dtype=None)
 data1000 = np.loadtxt("../Datasets_PRML_A1/train1000.txt", delimiter=' ', dtype=None)
+data2000 = np.loadtxt("../Datasets_PRML_A1/train.txt", delimiter=' ', dtype=None)
 
 data2 = np.loadtxt("../Datasets_PRML_A1/val.txt", delimiter=' ', dtype=None)
 data3 = np.loadtxt("../Datasets_PRML_A1/test.txt", delimiter=' ', dtype=None)
 
-np.random.shuffle(data1000)
+np.random.shuffle(data100)
 
-X_train = data1000[:,:2]
-y_train = data1000[:,-1]
+X_train = data2000[:,:2]
+y_train = data2000[:,-1]
 X_val = data2[:,:2]
 y_val = data2[:,-1]
 X_test = data3[:,:2]
@@ -161,7 +162,7 @@ if function_plot :
     ax.set_ylabel('x2')
     ax.set_zlabel('y')
     ax.set_title('Gaussian basis for 60 clusters, sigma 2')
-    plt.savefig("results/q7function1000.png")
+    plt.savefig("results/q7function2000.png")
     plt.show()
 
 
