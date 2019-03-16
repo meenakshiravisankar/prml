@@ -74,17 +74,6 @@ test_size = int(0.15*data1.shape[0])
 X_train = data1[:train_size,:2]
 y_train = data1[:train_size,-1]
 
-mu = np.mean(X_train,axis=0)
-diff = X_train - mu
-sigma = np.mean(diff**2,axis=0)
-mu_x = sigma[0]
-mu_y = sigma[1]
-mu_xy = np.multiply(diff[0],diff[1])/(X_train.shape[0])
-print(mu_x, mu_xy, mu_y)
-# print(np.array([[mu_x,mu_xy],[mu_xy,mu_y]]))
-
-# print(np.cov(np.array(X_train)).shape)
-
 X_val = data1[train_size:train_size+val_size,:2]
 y_val = data1[train_size:train_size+val_size,-1]
 
@@ -135,14 +124,55 @@ print("Test accuracy {:.2f}".format(accuracy))
 
 surface_plot = 0
 contour_plot = 0
+sub_plot = 0
+boundary_plot = 0
+
+if boundary_plot :
+    fig = plt.figure()
+    # Train scatter plot
+    plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
+    plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='g',label="class 1")
+    plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='b',label="class 2")
+
+    # Contour plots
+    x,y,z = getContour(mini,maxi,means[0,:],cov_rand,"Reds", fig)
+    plt.contour(x,y,z,colors=['red'])
+    x,y,z = getContour(mini,maxi,means[1,:],cov_rand,"Blues", fig)
+    plt.contour(x,y,z,colors=['green'])
+    x,y,z = getContour(mini,maxi,means[2,:],cov_rand,"Greens", fig)
+    plt.contour(x,y,z,colors=['blue'])
+
+    xy = np.mgrid[mini[0]:maxi[0]:0.1, mini[1]:maxi[1]:0.1].reshape(2,-1)
+
+    class1x,class1y = [],[]
+    class2x,class2y = [],[]
+    class3x,class3y = [],[]
+
+    X_data = np.transpose(xy)
+    y_data = np.zeros((X_data.shape[0],1))
+
+    pred, acc = f.getModel(X_data, y_data, means, cov_rand, lossfunction, prior, "naive", "same")
+
+    plt.scatter(X_data[pred==0,0], X_data[pred==0,1], color='orangered')
+    plt.scatter(X_data[pred==1,0], X_data[pred==1,1], color='lawngreen')
+    plt.scatter(X_data[pred==2,0], X_data[pred==2,1], color='deepskyblue')
+
+    
+    plt.xlabel("x1")
+    plt.ylabel("y1")
+    plt.title("Decision boundary for Dataset 1")
+
+    plt.savefig("results/boundary1.png")
+    # plt.show()
+
 if  surface_plot :
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
     # Surface plot for class conditional density
     getSurfacePlot(mini,maxi,means[0,:],cov_rand,"Reds", fig)
-    getSurfacePlot(mini,maxi,means[1,:],cov_rand,"Blues", fig)
-    getSurfacePlot(mini,maxi,means[2,:],cov_rand,"Greens", fig)
+    getSurfacePlot(mini,maxi,means[1,:],cov_rand,"Greens", fig)
+    getSurfacePlot(mini,maxi,means[2,:],cov_rand,"Blues", fig)
     plt.savefig("results/q11density.png")
     plt.show()
 
@@ -150,186 +180,188 @@ if contour_plot :
     fig = plt.figure()
     # Train scatter plot
     plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
-    plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='b',label="class 1")
-    plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='g',label="class 2")
+    plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='g',label="class 1")
+    plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='b',label="class 2")
     
     # Contour plots
     x,y,z = getContour(mini,maxi,means[0,:],cov_rand,"Reds", fig)
     plt.contour(x,y,z,colors=['red'])
     x,y,z = getContour(mini,maxi,means[1,:],cov_rand,"Blues", fig)
-    plt.contour(x,y,z,colors=['blue'])
-    x,y,z = getContour(mini,maxi,means[2,:],cov_rand,"Greens", fig)
     plt.contour(x,y,z,colors=['green'])
+    x,y,z = getContour(mini,maxi,means[2,:],cov_rand,"Greens", fig)
+    plt.contour(x,y,z,colors=['blue'])
     
-    print(cov_rand)
+    color = ['r','g','b']
+
     # Eigen values
-    # for i in classes :
-    #     i = int(i)
-    #     w, v = np.linalg.eig(cov_rand)
-    #     plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=3)
-    #     plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=8)
-    # plt.xlabel("x1")
-    # plt.ylabel("x2")
-    # plt.title("Best model on dataset 1 - Naive with same covariance")
-    # plt.legend(loc="lower right")
-    # plt.savefig("results/q11contour.png")
+    for i in classes :
+        i = int(i)
+        w, v = np.linalg.eig(cov_rand)
+        plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=3,color=color[i])
+        plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=8,color=color[i])
+    plt.xlabel("x1")
+    plt.ylabel("x2")
+    plt.title("Best model on dataset 1 - Naive with same covariance")
+    plt.legend(loc="lower right")
+    plt.savefig("results/q11contour.png")
     plt.show()
 
-    # plt.figure()
-    # plt.quiver(1,1,0.5,0.5,scale=0.001)
-    # plt.show()
-# plt.subplot(121)
-# getConfusion(y_test,prediction, "Model 2 Dataset 1")
+if sub_plot :
+    plt.subplot(121)
+    getConfusion(y_test,prediction, "Model 2 Dataset 1")
 
-# print("\n")
+print("\n")
 
-# print("Model 3 - Naive Bayes and covariance different")
-# cov_rand = f.getCompleteCovMatrix(X_train, y_train)
-# prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive", "diff")
-# train_accuracies.append(accuracy)
-# print("Train accuracy {:.2f}".format(accuracy))
-# prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "naive", "diff")
-# print("Validation accuracy {:.2f}".format(accuracy))
-# val_accuracies.append(accuracy)
-# if best_model_1[0] < accuracy :
-#     best_model_1 = [accuracy, "naive", "different covariance"]
-# prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive", "diff")
-# print("Test accuracy {:.2f}".format(accuracy))
-# # getConfusion(y_test,prediction, "Model 3 Dataset 1")
+print("Model 3 - Naive Bayes and covariance different")
+cov_rand = f.getCompleteCovMatrix(X_train, y_train)
+prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive", "diff")
+train_accuracies.append(accuracy)
+print("Train accuracy {:.2f}".format(accuracy))
+prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "naive", "diff")
+print("Validation accuracy {:.2f}".format(accuracy))
+val_accuracies.append(accuracy)
+if best_model_1[0] < accuracy :
+    best_model_1 = [accuracy, "naive", "different covariance"]
+prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive", "diff")
+print("Test accuracy {:.2f}".format(accuracy))
+# getConfusion(y_test,prediction, "Model 3 Dataset 1")
 
-# print("\n")
+print("\n")
 
-# print("Model 4 -  Bayes and covariance is same")
-# cov_rand = f.getCovMatrix(np.transpose(X_train))
-# prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "same")
-# train_accuracies.append(accuracy)
-# print("Train accuracy {:.2f}".format(accuracy))
-# prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "same")
-# print("Validation accuracy {:.2f}".format(accuracy))
-# val_accuracies.append(accuracy)
-# if best_model_1[0] < accuracy :
-#     best_model_1 = [accuracy, "bayes", "same covariance"]
-# prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "same")
-# print("Test accuracy {:.2f}".format(accuracy))
-# # getConfusion(y_test,prediction, "Model 4 Dataset 1")
+print("Model 4 -  Bayes and covariance is same")
+cov_rand = f.getCovMatrix(np.transpose(X_train))
+prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "same")
+train_accuracies.append(accuracy)
+print("Train accuracy {:.2f}".format(accuracy))
+prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "same")
+print("Validation accuracy {:.2f}".format(accuracy))
+val_accuracies.append(accuracy)
+if best_model_1[0] < accuracy :
+    best_model_1 = [accuracy, "bayes", "same covariance"]
+prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "same")
+print("Test accuracy {:.2f}".format(accuracy))
+# getConfusion(y_test,prediction, "Model 4 Dataset 1")
 
-# print("\n")
+print("\n")
 
-# print("Model 5 - Bayes and covariance is different")
-# cov_rand = f.getCompleteCovMatrix(X_train, y_train)
-# prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "diff")
-# train_accuracies.append(accuracy)
-# print("Train accuracy {:.2f}".format(accuracy))
-# prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "diff")
-# print("Validation accuracy {:.2f}".format(accuracy))
-# val_accuracies.append(accuracy)
-# if best_model_1[0] < accuracy :
-#     best_model_1 = [accuracy, "bayes", "different covariance"]
-# prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "diff")
-# print("Test accuracy {:.2f}".format(accuracy))
-# # getConfusion(y_test,prediction, "Model 5 Dataset 1")
+print("Model 5 - Bayes and covariance is different")
+cov_rand = f.getCompleteCovMatrix(X_train, y_train)
+prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "diff")
+train_accuracies.append(accuracy)
+print("Train accuracy {:.2f}".format(accuracy))
+prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "diff")
+print("Validation accuracy {:.2f}".format(accuracy))
+val_accuracies.append(accuracy)
+if best_model_1[0] < accuracy :
+    best_model_1 = [accuracy, "bayes", "different covariance"]
+prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "diff")
+print("Test accuracy {:.2f}".format(accuracy))
+# getConfusion(y_test,prediction, "Model 5 Dataset 1")
 
-# print("\n")
+print("\n")
 
-# np.savetxt('results/accuracy_of_training_dataset_1',train_accuracies,fmt='%.2f')
-# np.savetxt('results/accuracy_of_validation_dataset_1',val_accuracies,fmt='%.2f')
+np.savetxt('results/accuracy_of_training_dataset_1',train_accuracies,fmt='%.2f')
+np.savetxt('results/accuracy_of_validation_dataset_1',val_accuracies,fmt='%.2f')
 
-# # shuffling
-# np.random.shuffle(data2)
+# shuffling
+np.random.shuffle(data2)
 
-# train_accuracies = []
-# val_accuracies = []
+train_accuracies = []
+val_accuracies = []
 
-# # splitting into train, test, validation - 80, 10, 10 and converting to numpy array
-# train_size = int(0.7*data2.shape[0])
-# val_size = int(0.15*data2.shape[0])
-# test_size = int(0.15*data2.shape[0])
+# splitting into train, test, validation - 70, 15, 15 and converting to numpy array
+train_size = int(0.7*data2.shape[0])
+val_size = int(0.15*data2.shape[0])
+test_size = int(0.15*data2.shape[0])
 
-# X_train = data2[:train_size,:2]
-# y_train = data2[:train_size,-1]
+X_train = data2[:train_size,:2]
+y_train = data2[:train_size,-1]
 
-# X_val = data2[train_size:train_size+val_size,:2]
-# y_val = data2[train_size:train_size+val_size,-1]
+X_val = data2[train_size:train_size+val_size,:2]
+y_val = data2[train_size:train_size+val_size,-1]
 
-# X_test = data2[train_size+val_size:train_size+val_size+test_size,:2]
-# y_test = data2[train_size+val_size:train_size+val_size+test_size,-1]
+X_test = data2[train_size+val_size:train_size+val_size+test_size,:2]
+y_test = data2[train_size+val_size:train_size+val_size+test_size,-1]
 
-# print("Dataset 2")
-# print("Size of train, validation and test sets",X_train.shape,X_val.shape,X_test.shape)
-# classes, prior = f.getPrior(y_train)
-# print("Number of classes", len(classes))
-# means = np.array(f.getMLE(X_train, y_train))
-# lossfunction = np.array([[0,1,2],[1,0,1],[2,1,0]])
+mini = np.min(X_train, axis=0)
+maxi = np.max(X_train, axis=0)
 
-# print("\n")
+print("Dataset 2")
+print("Size of train, validation and test sets",X_train.shape,X_val.shape,X_test.shape)
+classes, prior = f.getPrior(y_train)
+print("Number of classes", len(classes))
+means = np.array(f.getMLE(X_train, y_train))
+lossfunction = np.array([[0,1,2],[1,0,1],[2,1,0]])
 
-# accuracies = []
+print("\n")
 
-# print("Model 1 - Naive Bayes and covariance is identity")
-# prediction, accuracy =  f.getModel(X_train, y_train, means, np.eye(2), lossfunction, prior, "naive", "same")
-# train_accuracies.append(accuracy)
-# print("Train accuracy {:.2f}".format(accuracy))
-# prediction, accuracy =  f.getModel(X_val, y_val, means, np.eye(2), lossfunction, prior, "naive", "same")
-# print("Validation accuracy {:.2f}".format(accuracy))
-# val_accuracies.append(accuracy)
-# if best_model_2[0] < accuracy :
-#     best_model_2 = [accuracy, "naive", "same covariance - identity"]
-# prediction, accuracy =  f.getModel(X_test, y_test, means, np.eye(2), lossfunction, prior, "naive", "same")
-# print("Test accuracy {:.2f}".format(accuracy))
-# # getConfusion(y_test,prediction, "Model 1 Dataset 2")
+accuracies = []
 
-# print("\n")
+print("Model 1 - Naive Bayes and covariance is identity")
+prediction, accuracy =  f.getModel(X_train, y_train, means, np.eye(2), lossfunction, prior, "naive", "same")
+train_accuracies.append(accuracy)
+print("Train accuracy {:.2f}".format(accuracy))
+prediction, accuracy =  f.getModel(X_val, y_val, means, np.eye(2), lossfunction, prior, "naive", "same")
+print("Validation accuracy {:.2f}".format(accuracy))
+val_accuracies.append(accuracy)
+if best_model_2[0] < accuracy :
+    best_model_2 = [accuracy, "naive", "same covariance - identity"]
+prediction, accuracy =  f.getModel(X_test, y_test, means, np.eye(2), lossfunction, prior, "naive", "same")
+print("Test accuracy {:.2f}".format(accuracy))
+# getConfusion(y_test,prediction, "Model 1 Dataset 2")
 
-
-# print("Model 2 - Naive Bayes and covariance is same")
-# cov_rand = f.getCovMatrix(np.transpose(X_train))
-# prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive", "same")
-# train_accuracies.append(accuracy)
-# print("Train accuracy {:.2f}".format(accuracy))
-# prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "naive", "same")
-# print("Validation accuracy {:.2f}".format(accuracy))
-# val_accuracies.append(accuracy)
-# if best_model_2[0] < accuracy :
-#     best_model_2 = [accuracy, "naive", "same covariance"]
-# prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive", "same")
-# print("Test accuracy {:.2f}".format(accuracy))
-# # getConfusion(y_test,prediction, "Model 2 Dataset 2")
-
-# print("\n")
+print("\n")
 
 
-# print("Model 3 - Naive Bayes and covariance different")
-# cov_rand = f.getCompleteCovMatrix(X_train, y_train)
-# prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive", "diff")
-# train_accuracies.append(accuracy)
-# print("Train accuracy {:.2f}".format(accuracy))
-# prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "naive", "diff")
-# print("Validation accuracy {:.2f}".format(accuracy))
-# val_accuracies.append(accuracy)
-# if best_model_2[0] < accuracy :
-#     best_model_2 = [accuracy, "naive", "different covariance"]
-# prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive", "diff")
-# print("Test accuracy {:.2f}".format(accuracy))
-# # getConfusion(y_test,prediction, "Model 3 Dataset 2")
+print("Model 2 - Naive Bayes and covariance is same")
+cov_rand = f.getCovMatrix(np.transpose(X_train))
+prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive", "same")
+train_accuracies.append(accuracy)
+print("Train accuracy {:.2f}".format(accuracy))
+prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "naive", "same")
+print("Validation accuracy {:.2f}".format(accuracy))
+val_accuracies.append(accuracy)
+if best_model_2[0] < accuracy :
+    best_model_2 = [accuracy, "naive", "same covariance"]
+prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive", "same")
+print("Test accuracy {:.2f}".format(accuracy))
+# getConfusion(y_test,prediction, "Model 2 Dataset 2")
 
-# print("\n")
+print("\n")
 
 
-# print("Model 4 -  Bayes and covariance is same")
-# cov_rand = f.getCovMatrix(np.transpose(X_train))
-# prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "same")
-# train_accuracies.append(accuracy)
-# print("Train accuracy {:.2f}".format(accuracy))
-# prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "same")
-# print("Validation accuracy {:.2f}".format(accuracy))
-# val_accuracies.append(accuracy)
-# if best_model_2[0] < accuracy :
-#     best_model_2 = [accuracy, "bayes", "same covariance"]
-# prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "same")
-# print("Test accuracy {:.2f}".format(accuracy))
-# # getConfusion(y_test,prediction, "Model 4 Dataset 2")
+print("Model 3 - Naive Bayes and covariance different")
+cov_rand = f.getCompleteCovMatrix(X_train, y_train)
+prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "naive", "diff")
+train_accuracies.append(accuracy)
+print("Train accuracy {:.2f}".format(accuracy))
+prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "naive", "diff")
+print("Validation accuracy {:.2f}".format(accuracy))
+val_accuracies.append(accuracy)
+if best_model_2[0] < accuracy :
+    best_model_2 = [accuracy, "naive", "different covariance"]
+prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "naive", "diff")
+print("Test accuracy {:.2f}".format(accuracy))
+# getConfusion(y_test,prediction, "Model 3 Dataset 2")
 
-# print("\n")
+print("\n")
+
+
+print("Model 4 -  Bayes and covariance is same")
+cov_rand = f.getCovMatrix(np.transpose(X_train))
+prediction, accuracy =  f.getModel(X_train, y_train, means, cov_rand, lossfunction, prior, "bayes", "same")
+train_accuracies.append(accuracy)
+print("Train accuracy {:.2f}".format(accuracy))
+prediction, accuracy =  f.getModel(X_val, y_val, means, cov_rand, lossfunction, prior, "bayes", "same")
+print("Validation accuracy {:.2f}".format(accuracy))
+val_accuracies.append(accuracy)
+if best_model_2[0] < accuracy :
+    best_model_2 = [accuracy, "bayes", "same covariance"]
+prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "same")
+print("Test accuracy {:.2f}".format(accuracy))
+# getConfusion(y_test,prediction, "Model 4 Dataset 2")
+
+print("\n")
 
 print("Model 5 - Bayes and covariance is different")
 cov_rand = f.getCompleteCovMatrix(X_train, y_train)
@@ -343,44 +375,99 @@ if best_model_2[0] < accuracy :
     best_model_2 = [accuracy, "bayes", "different covariance"]
 prediction, accuracy =  f.getModel(X_test, y_test, means, cov_rand, lossfunction, prior, "bayes", "diff")
 print("Test accuracy {:.2f}".format(accuracy))
-# # plt.subplot(122)
-# # getConfusion(y_test,prediction, "Model 5 Dataset 2")
 
-# fig = plt.figure()
-# cov_rand = np.array(cov_rand)
-# # getSurfacePlot(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
-# # getSurfacePlot(mini,maxi,means[1,:],cov_rand[1,:,:],"Blues", fig)
-# # getSurfacePlot(mini,maxi,means[2,:],cov_rand[2,:,:],"Greens", fig)
-# # plt.savefig("results/q12density.png")
-# # plt.show()
+cov_rand = np.array(cov_rand)
 
-# x,y,z = getContour(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
-# plt.contour(x,y,z,colors=['red'])
-# x,y,z = getContour(mini,maxi,means[1,:],cov_rand[1,:,:],"Blues", fig)
-# plt.contour(x,y,z,colors=['blue'])
-# x,y,z = getContour(mini,maxi,means[2,:],cov_rand[2,:,:],"Greens", fig)
-# plt.contour(x,y,z,colors=['green'])
+surface_plot = 0
+contour_plot = 0
+sub_plot = 0
+boundary_plot = 0
 
-# # # Eigen values
-# print(cov_rand)
-# for i in classes :
-#     i = int(i)
-#     w, v = np.linalg.eig(cov_rand[i,:,:])
-#     plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=3)
-#     plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=8)
-#     print(v)
-# plt.xlabel("x1")
-# plt.ylabel("x2")
-# plt.title("Best model on dataset 2 - Bayes with different covariance")
-# plt.legend(loc="lower right")
-# plt.savefig("results/q12contour.png")
+if boundary_plot :
+    fig = plt.figure()
+    # Train scatter plot
+    plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
+    plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='g',label="class 1")
+    plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='b',label="class 2")
+
+    # Contour plots
+    x,y,z = getContour(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
+    plt.contour(x,y,z,colors=['red'])
+    x,y,z = getContour(mini,maxi,means[1,:],cov_rand[1,:,:],"Greens", fig)
+    plt.contour(x,y,z,colors=['green'])
+    x,y,z = getContour(mini,maxi,means[2,:],cov_rand[2,:,:],"Blues", fig)
+    plt.contour(x,y,z,colors=['blue'])
+
+    xy = np.mgrid[mini[0]:maxi[0]:0.1, mini[1]:maxi[1]:0.1].reshape(2,-1)
+
+    class1x,class1y = [],[]
+    class2x,class2y = [],[]
+    class3x,class3y = [],[]
+
+    X_data = np.transpose(xy)
+    y_data = np.zeros((X_data.shape[0],1))
+
+    pred, acc = f.getModel(X_data, y_data, means, cov_rand, lossfunction, prior, "bayes", "diff")
+
+    plt.scatter(X_data[pred==0,0], X_data[pred==0,1], color='orangered')
+    plt.scatter(X_data[pred==1,0], X_data[pred==1,1], color='lawngreen')
+    plt.scatter(X_data[pred==2,0], X_data[pred==2,1], color='deepskyblue')
+
+    plt.xlabel("x1")
+    plt.ylabel("y1")
+    plt.title("Decision boundary for Dataset 2")
+
+    plt.savefig("results/boundary2.png")
+
+if  surface_plot :
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    # Surface plot for class conditional density
+    getSurfacePlot(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
+    getSurfacePlot(mini,maxi,means[1,:],cov_rand[1,:,:],"Greens", fig)
+    getSurfacePlot(mini,maxi,means[2,:],cov_rand[2,:,:],"Blues", fig)
+    plt.savefig("results/q12density.png")
+    plt.show()
+
+if contour_plot :
+    fig = plt.figure()
+    # Train scatter plot
+    plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
+    plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='g',label="class 1")
+    plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='b',label="class 2")
+    
+    # Contour plots
+    x,y,z = getContour(mini,maxi,means[0,:],cov_rand[0,:,:],"Reds", fig)
+    plt.contour(x,y,z,colors=['red'])
+    x,y,z = getContour(mini,maxi,means[1,:],cov_rand[1,:,:],"Greens", fig)
+    plt.contour(x,y,z,colors=['green'])
+    x,y,z = getContour(mini,maxi,means[2,:],cov_rand[2,:,:],"Blues", fig)
+    plt.contour(x,y,z,colors=['blue'])
+
+    scales = np.array([[3,5],[2,4],[4,4]])
+    color = ['r','g','b']
+    # Eigen values
+    for i in classes :
+        i = int(i)
+        w, v = np.linalg.eig(cov_rand[i,:,:])
+        plt.quiver(means[i,0],means[i,1],v[0][0],v[1][0],scale=scales[i][0],color=color[i])
+        plt.quiver(means[i,0],means[i,1],v[0][1],v[1][1],scale=scales[i][1],color=color[i])
+    plt.xlabel("x1")
+    plt.ylabel("x2")
+    plt.title("Best model on dataset 2 - Bayes with different covariance")
+    plt.legend(loc="lower right")
+    plt.savefig("results/q12contour.png")
+    plt.show()
+
+# plt.subplot(122)
+# getConfusion(y_test,prediction, "Model 5 Dataset 2")
+
+print("\n")
+
+print("The best model for dataset 1 has validation accuracy ",best_model_1)
+print("The best model for dataset 2 has validation accuracy ",best_model_2)
+np.savetxt('results/accuracy_of_training_dataset_2',train_accuracies,fmt='%.2f')
+np.savetxt('results/accuracy_of_validation_dataset_2',val_accuracies,fmt='%.2f')
+
 # plt.show()
-
-# print("\n")
-
-# print("The best model for dataset 1 has validation accuracy ",best_model_1)
-# print("The best model for dataset 2 has validation accuracy ",best_model_2)
-# np.savetxt('results/accuracy_of_training_dataset_2',train_accuracies,fmt='%.2f')
-# np.savetxt('results/accuracy_of_validation_dataset_2',val_accuracies,fmt='%.2f')
-
-# # plt.show()

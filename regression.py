@@ -28,7 +28,6 @@ def getRMSE(ytrue,ypred,ridge,w) :
     
 def getResults(X,y,degree,ridge) :
     X = getPolyfeatures(X, degree)
-    print("shape is", X.shape)
     w = getWeights(X, y, ridge)
     y_pred = getPolyfit(X,w)
     rmse = getRMSE(y,y_pred,ridge,w)
@@ -43,7 +42,7 @@ y = np.ndarray(shape=(100,1),dtype=np.float64)
 
 # Generate 100 points in (0,1)
 X = np.random.uniform(low=0,high=1,size=100).reshape(100,1)
-noise = np.random.normal(0,np.sqrt(0.1),100).reshape(100,1)
+noise = np.random.normal(0,np.sqrt(0.2),100).reshape(100,1)
 func = getFunc(X)
 y = func + noise
 
@@ -126,7 +125,7 @@ for degree in degrees :
 rmses = np.array(rmses)
 scores = rmses[:,-1].reshape(-1,1)
 best_model = rmses[np.argmin(scores,axis=0)[0]]
-print("Parameters of best model has degree, lambda, train size",best_model[0],best_model[1],best_model[2])
+print("Parameters of best model are degree, lambda, train size",best_model[0],best_model[1],best_model[2])
 
 if default :
     raise SystemExit

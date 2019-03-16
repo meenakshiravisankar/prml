@@ -40,14 +40,14 @@ def getResults(X,y,mu,sigma,ridge) :
 # Seeding
 np.random.seed(42)
 
-data1 = np.loadtxt("../Datasets_PRML_A1/train100.txt", delimiter=' ', dtype=None)
+data100 = np.loadtxt("../Datasets_PRML_A1/train100.txt", delimiter=' ', dtype=None)
 data2 = np.loadtxt("../Datasets_PRML_A1/val.txt", delimiter=' ', dtype=None)
 data3 = np.loadtxt("../Datasets_PRML_A1/test.txt", delimiter=' ', dtype=None)
 
-np.random.shuffle(data1)
+np.random.shuffle(data100)
 
-X_train = data1[:,:2]
-y_train = data1[:,-1]
+X_train = data100[:,:2]
+y_train = data100[:,-1]
 X_val = data2[:,:2]
 y_val = data2[:,-1]
 X_test = data3[:,:2]
@@ -56,42 +56,90 @@ y_test = data3[:,-1]
 # Settings 
 clusters = [2,4,10,20,30,40,50,60]
 ridges = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
-sigmas = [0.01,0.1,1,2]
+sigmas = [0.1,1,2]
 ridges[0] = 0
 
-default = 1
+default = 0
 if default :
     clusters = [60]
     ridges = [0]
     sigmas = [1]
+emrs = 1
+if emrs :
+    clusters = [10,20,30,40,50,60,70,80]
+    ridges = [0]
+    sigmas = [2]
 
-rmses = []
-mini = np.min(X_train,axis=0)-1
-maxi = np.max(X_train,axis=0)+1
+train_rmses = []
+val_rmses = []
+test_rmses = []
 
 for cluster in clusters :
     for ridge in ridges :
         for sigma in sigmas :
             mu = kmeans(X_train,cluster)
             w, y_pred, rmse = getResults(X_train,y_train,mu,sigma,ridge)
-            print(rmse)
+            train_rmses.append(np.array([cluster, ridge, sigma, rmse]))
+            X = getGaussianBasis(X_val,mu,sigma)
+            y_pred = getPolyfit(X,w)
+            rmse = getRMSE(y_val,y_pred,ridge,w)
+            val_rmses.append(np.array([cluster, ridge, sigma, rmse]))
+            X = getGaussianBasis(X_test,mu,sigma)
+            y_pred = getPolyfit(X,w)
+            rmse = getRMSE(y_test,y_pred,ridge,w)
+            test_rmses.append(np.array([cluster, ridge, sigma, rmse]))
 
-x = np.linspace(mini[0],maxi[0],1000)
-x = np.random.uniform(mini[0],maxi[0],1000)
-y = np.linspace(mini[1],maxi[1],1000)
-y = np.linspace(mini[1],maxi[1],1000)
+# Finding best model based using validation set
+val_rmses = np.array(val_rmses)
+scores = val_rmses[:,-1].reshape(-1,1)
+best_model = val_rmses[np.argmin(scores,axis=0)[0]]
+if emrs :
+    np.savetxt("results/q7/ermstrain"+str(X_train.shape[0])+".txt", train_rmses, fmt="%.2f")
+    np.savetxt("results/q7/ermstest"+str(X_train.shape[0])+".txt", test_rmses, fmt="%.2f")
+    np.savetxt("results/q7/ermsval"+str(X_train.shape[0])+".txt", val_rmses, fmt="%.2f")
 
-x_train = np.array([x,y]).reshape(1000,-1)
-x_train = getGaussianBasis(x_train,mu,sigma)
-y_pred =  getPolyfit(x_train,w)
-# Axes3D.plot_surface(X=x,Y=y,Z=y_pred)
+print("Parameters of best model are cluster, lambda, sigma",best_model[0],best_model[1],best_model[2])
+
+scatter_plot = 0
+if scatter_plot :
+    cluster = int(best_model[0])
+    ridge = best_model[1]
+    sigma = best_model[2]
+    mu = kmeans(X_train,cluster)
+    w, y_pred, rmse = getResults(X_train,y_train,mu,sigma,ridge)
+    fig = plt.figure()
+    plt.scatter(y_train, y_pred, label="Train")
+    w, y_pred, rmse = getResults(X_test,y_test,mu,sigma,ridge)
+    plt.scatter(y_test, y_pred, label="Test")
+    plt.xlabel("True Target")
+    plt.ylabel("Model output")
+    plt.title("Best model on train100")
+    plt.savefig("results/q7scatter.png")
+    plt.legend()
+    plt.show()
+# mini = np.min(X_train,axis=0)-1
+# maxi = np.max(X_train,axis=0)+1
+
+
+# xy = np.mgrid[mini[0]:maxi[0]:0.1, mini[1]:maxi[1]:0.1].reshape(2,-1)
+# X_data = np.transpose(xy)
+# y_data = np.zeros((X_data.shape[0],1))
+
+# X_data = getGaussianBasis(X_data,mu,sigma)
+# y_pred =  getPolyfit(X_data,w) #.reshape(-1,1)
+# # Axes3D.plot_surface(X=x,Y=y,Z=y_pred)
+
+# fig = plt.figure()
+# ax = fig.gca(projection='3d')
+# x1 = X_data[:,0] #.reshape(-1,1)
+# x2 = X_data[:,1] #.reshape(-1,1)
+
+# print(x1.shape, x2.shape, y_pred.shape)
+# ax.plot(x1, x2, y_pred)
+
+# ax.scatter(X_train[:,0],X_train[:,1],y_train,c='b')
+
 # plt.show()
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-print(x.shape, y.shape, y_pred.shape)
-ax.plot_wireframe(x, y, y_pred)
-ax.scatter(X_train[:,0],X_train[:,1],y_train,c='r')
-plt.show()
 
 
 
