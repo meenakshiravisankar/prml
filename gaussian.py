@@ -49,8 +49,8 @@ data3 = np.loadtxt("../Datasets_PRML_A1/test.txt", delimiter=' ', dtype=None)
 
 np.random.shuffle(data100)
 
-X_train = data2000[:,:2]
-y_train = data2000[:,-1]
+X_train = data100[:,:2]
+y_train = data100[:,-1]
 X_val = data2[:,:2]
 y_val = data2[:,-1]
 X_test = data3[:,:2]
@@ -118,7 +118,7 @@ cluster = int(best_model[0])
 ridge = best_model[1]
 sigma = best_model[2]
 
-scatter_plot = 0
+scatter_plot = 1
 if scatter_plot :   
     mu = kmeans(X_train,cluster)
     w, y_pred, rmse = getResults(X_train,y_train,mu,sigma,ridge)
@@ -129,11 +129,11 @@ if scatter_plot :
     plt.xlabel("True Target")
     plt.ylabel("Model output")
     plt.title("Best model on train100")
-    plt.savefig("results/q7scatter.png")
     plt.legend()
+    plt.savefig("results/q7scatter.png")
     plt.show()
 
-function_plot = 1
+function_plot = 0
 if function_plot :
     fig = plt.figure()
     ax = fig.gca(projection='3d')
