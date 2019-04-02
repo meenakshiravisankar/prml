@@ -67,12 +67,8 @@ def getConfusion(y, pred, name) :
 
 # read datasets
 data1 = np.loadtxt("../Datasets_PRML_A2/Dataset_2_Team_39.csv", delimiter=',', dtype=None)
-plt.scatter(data1[:,0],data1[:,1],c=data1[:,2])
-plt.savefig("results/Dataset2_scatter")
 
 data2 = np.loadtxt("../Datasets_PRML_A2/Dataset_4_Team_39.csv", delimiter=',', dtype=None)
-plt.scatter(data2[:,0],data2[:,1],c=data2[:,2])
-plt.savefig("results/Dataset4_scatter")
 
 # shuffling
 np.random.shuffle(data1)
@@ -103,77 +99,42 @@ w_init = np.array(np.random.rand(2))
 print("Initial w =", w_init)
 
 etas = [0.01, 0.1, 1, 10]
-# for i in range(len(etas)):
-#     w_train = runPerceptron(w_init, X_train, y_train, etas[i])
-#     print(etas[i], w_train, accuracy(w_train, X_train, y_train))
-#     w_test = runPerceptron(w_init, X_test, y_test, etas[i])
-#     print(etas[i], w_test, accuracy(w_test, X_test, y_test))
-#     getConfusion(y_test, predictions(w_test, X_test), "Dataset 2 Perceptron "+str(i))
-
-# decision boundary plot for dataset 2
-fig = plt.figure()
-# Train scatter plot
-plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
-plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='b',label="class 1")
-
-# Contour plots
-# x,y = getContour(mini,maxi,means[0,:],cov_rand,"Reds", fig)
-# plt.contour(x,y,colors=['red'])
-# x,y = getContour(mini,maxi,means[1,:],cov_rand,"Blues", fig)
-# plt.contour(x,y,colors=['blue'])
-#
-xy = np.mgrid[mini[0]:maxi[0]:0.1, mini[1]:maxi[1]:0.1].reshape(2,-1)
-
-class1x,class1y = [],[]
-class2x,class2y = [],[]
-
-X_data = np.transpose(xy)
-y_data = np.zeros((X_data.shape[0],1))
-
-# pred, acc = f.getModel(X_data, y_data, means, cov_rand, lossfunction, prior, "naive", "same")
-eta = 1 # change to best eta
-w = runPerceptron(w_init, X_data, y_data, eta)
-print("eta =", eta, "w =", w, "accuacy =", accuracy(w, X_data, y_data))
-pred = predictions(w, X_data)
-
-plt.scatter(X_data[pred==0,0], X_data[pred==0,1], color='orangered')
-plt.scatter(X_data[pred==1,0], X_data[pred==1,1], color='deepskyblue')
-
-plt.xlabel("x1")
-plt.ylabel("y1")
-plt.title("Decision boundary for Dataset 2")
-
-plt.savefig("results/boundary1.png")
+for i in range(len(etas)):
+    w_train = runPerceptron(w_init, X_train, y_train, etas[i])
+    print(etas[i], w_train, accuracy(w_train, X_train, y_train))
+    w_test = runPerceptron(w_init, X_test, y_test, etas[i])
+    print(etas[i], w_test, accuracy(w_test, X_test, y_test))
+    getConfusion(y_test, predictions(w_test, X_test), "Dataset 2 Perceptron "+str(i))
 
 # shuffling
-# np.random.shuffle(data2)
-#
-# # splitting into train, test - 65, 35
-# train_size = int(0.65*data2.shape[0])
-# test_size = int(0.35*data2.shape[0])
-#
-# X_train = data2[:train_size,:2]
-# y_train = data2[:train_size,-1]
-#
-# X_test = data2[train_size:train_size+test_size,:2]
-# y_test = data2[train_size:train_size+test_size,-1]
-#
-# print("Dataset 4")
-# print("Number of features = 2")
-# print("Size of train and test sets =", X_train.shape, X_test.shape)
-# classes, counts = np.unique(y_train, return_counts=True)
-# print("Number of classes =", len(classes))
-# print("Counts for each class =", counts)
-# print("\n")
-#
-# # random initial choice of w
-# w_init = np.array(np.random.rand(2))
-# print("Initial w =", w_init)
-#
-# etas = [0.01, 0.1, 1, 10]
-# for i in range(len(etas)):
-#     w_train = runPerceptron(w_init, X_train, y_train, etas[i])
-#     print(etas[i], w_train, accuracy(w_train, X_train, y_train))
-#     w_test = runPerceptron(w_init, X_test, y_test, etas[i])
-#     print(etas[i], w_test, accuracy(w_test, X_test, y_test))
-#     getConfusion(y_test, predictions(w_test, X_test), "Dataset 4 Perceptron "+str(i))
+np.random.shuffle(data2)
+
+# splitting into train, test - 65, 35
+train_size = int(0.65*data2.shape[0])
+test_size = int(0.35*data2.shape[0])
+
+X_train = data2[:train_size,:2]
+y_train = data2[:train_size,-1]
+
+X_test = data2[train_size:train_size+test_size,:2]
+y_test = data2[train_size:train_size+test_size,-1]
+
+print("Dataset 4")
+print("Number of features = 2")
+print("Size of train and test sets =", X_train.shape, X_test.shape)
+classes, counts = np.unique(y_train, return_counts=True)
+print("Number of classes =", len(classes))
+print("Counts for each class =", counts)
+print("\n")
+
+# random initial choice of w
+w_init = np.array(np.random.rand(2))
+print("Initial w =", w_init)
+
+etas = [0.01, 0.1, 1, 10]
+for i in range(len(etas)):
+    w_train = runPerceptron(w_init, X_train, y_train, etas[i])
+    print(etas[i], w_train, accuracy(w_train, X_train, y_train))
+    w_test = runPerceptron(w_init, X_test, y_test, etas[i])
+    print(etas[i], w_test, accuracy(w_test, X_test, y_test))
+    getConfusion(y_test, predictions(w_test, X_test), "Dataset 4 Perceptron "+str(i))
