@@ -1,1 +1,1 @@
-- [] Sublime Text 2 package
+- [x] Finish my changes
