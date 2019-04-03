@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
+import sklearn.datasets
 import confusion_matrix as cf_mat
 import matplotlib.pyplot as plt
 from random import randint
@@ -52,6 +53,7 @@ def runPerceptron(w, X, y, eta):
             elif (pred >= 0) and (y[i] == 0):
                 w = w - eta*X[i]
         iter = iter + 1
+    print("iterations taken =", iter)
     return w
 
 def getConfusion(y, pred, name) :
@@ -64,6 +66,18 @@ def getConfusion(y, pred, name) :
     plt.savefig("results/"+name)
     # plt.show()
     return
+
+# X, y = sklearn.datasets.make_classification(n_samples=30, n_features=2, n_informative=2, n_redundant=0, n_repeated=0, class_sep = 3, n_classes=2)
+# f = plt.figure(1)
+# plt.scatter(X[:,0],X[:,1],c=y)
+# plt.savefig("results/dummy_scatter")
+#
+# w_init = np.array(np.random.rand(2))
+# etas = [0.01, 0.1, 1, 10]
+# for i in range(len(etas)):
+#     w = runPerceptron(w_init, X, y, etas[i])
+#     print(etas[i], w, accuracy(w, X, y))
+#     getConfusion(y, predictions(w, X), "Dummy Perceptron "+str(i))
 
 # read datasets
 data1 = np.loadtxt("../Datasets_PRML_A2/Dataset_2_Team_39.csv", delimiter=',', dtype=None)
@@ -83,9 +97,6 @@ y_train = data1[:train_size,-1]
 X_test = data1[train_size:train_size+test_size,:2]
 y_test = data1[train_size:train_size+test_size,-1]
 
-mini = np.min(X_train, axis=0)
-maxi = np.max(X_train, axis=0)
-
 print("Dataset 2")
 print("Number of features = 2")
 print("Size of train and test sets =", X_train.shape, X_test.shape)
@@ -102,9 +113,10 @@ etas = [0.01, 0.1, 1, 10]
 for i in range(len(etas)):
     w_train = runPerceptron(w_init, X_train, y_train, etas[i])
     print(etas[i], w_train, accuracy(w_train, X_train, y_train))
-    w_test = runPerceptron(w_init, X_test, y_test, etas[i])
-    print(etas[i], w_test, accuracy(w_test, X_test, y_test))
-    getConfusion(y_test, predictions(w_test, X_test), "Dataset 2 Perceptron "+str(i))
+    getConfusion(y_train, predictions(w_train, X_train), "Dataset2_Perceptron_"+str(i))
+    # w_test = runPerceptron(w_init, X_test, y_test, etas[i])
+    # print(etas[i], w_test, accuracy(w_test, X_test, y_test))
+    # getConfusion(y_test, predictions(w_test, X_test), "Dataset2_Perceptron_"+str(i))
 
 # shuffling
 np.random.shuffle(data2)
@@ -135,6 +147,7 @@ etas = [0.01, 0.1, 1, 10]
 for i in range(len(etas)):
     w_train = runPerceptron(w_init, X_train, y_train, etas[i])
     print(etas[i], w_train, accuracy(w_train, X_train, y_train))
-    w_test = runPerceptron(w_init, X_test, y_test, etas[i])
-    print(etas[i], w_test, accuracy(w_test, X_test, y_test))
-    getConfusion(y_test, predictions(w_test, X_test), "Dataset 4 Perceptron "+str(i))
+    getConfusion(y_train, predictions(w_train, X_train), "Dataset4_Perceptron_"+str(i))
+    # w_test = runPerceptron(w_init, X_test, y_test, etas[i])
+    # print(etas[i], w_test, accuracy(w_test, X_test, y_test))
+    # getConfusion(y_test, predictions(w_test, X_test), "Dataset4_Perceptron_"+str(i))
