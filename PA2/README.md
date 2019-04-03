@@ -4,4 +4,7 @@
 - [] change perceptron and svm with val 20% 
 - [] add acc vs iterations plot 
 - [] how to add support vectors, hyperplane
-- [] In kernel, vary gamma in rbf, p in polynomial 
+- [] In kernel, vary gamma in rbf, p in polynomial
+
+Misc.
+- [] Screen share
