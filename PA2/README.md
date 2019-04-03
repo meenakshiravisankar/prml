@@ -1,1 +1,6 @@
-- [] Finish my changes
+- [] 1.3.2 check transformed space - avl
+- [] finish 1.3, 1.1
+- [] change plots with class labels - avl
+- [] change perceptron with val 20% - avl
+- [] add acc vs iterations plot - avl
+- [] 
