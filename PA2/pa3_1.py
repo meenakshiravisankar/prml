@@ -5,12 +5,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from decimal import Decimal
 from sklearn.metrics import confusion_matrix
 import confusion_matrix as cf_mat
-from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 
 # seeding
