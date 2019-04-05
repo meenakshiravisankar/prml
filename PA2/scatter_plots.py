@@ -16,10 +16,7 @@ def get_plot(path_to_csv,num) :
 get_plot("../Datasets_PRML_A2/Dataset_1_Team_39.csv",1)
 plt.savefig("results/Dataset"+str(1)+"_scatter")
 
-fig = plt.figure()
-
 for i in range(2,6) :
     plt.subplot(219+i)
     get_plot("../Datasets_PRML_A2/Dataset_"+str(i)+"_Team_39.csv",i)
-
 plt.savefig("results/Dataset2345_scatter")
