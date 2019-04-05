@@ -7,5 +7,6 @@
 - [ ] In kernel, vary gamma in rbf, p in polynomial
 - [ ] Scatter plots 5 datasets + 1 showing class in single plot
 
-Misc.
-- [ ] Screen share
+Doubts
+- [ ] SVM library
+- [ ] standardization or normalization of data
