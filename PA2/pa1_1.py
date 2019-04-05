@@ -18,8 +18,8 @@ def get_wt_init(wt_init,size) :
         w = np.random.uniform(low=0,high=1,size=(size,1))
     return w
 
-# def get_norm(data) :
-    # data
+def get_standardization(data,mean,std) :
+    data 
 
 def get_description(data) :
     print("Mean of train data ",np.mean(data,axis=0))
