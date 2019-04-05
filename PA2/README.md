@@ -5,6 +5,7 @@
 - [] add acc vs iterations plot 
 - [] how to add support vectors, hyperplane
 - [] In kernel, vary gamma in rbf, p in polynomial
+- [] Scatter plots 5 datasets + 1 showing class in single plot
 
 Misc.
 - [] Screen share
