@@ -96,7 +96,7 @@ print("Logistic Regression")
 print("Size of train, validation and test sets -",X_train.shape,X_val.shape,X_test.shape)
 print("Classes -",classes)
 
-standard = 0
+standard = 1
 iterations = [100,1000,10000]
 
 # hyperparameters 1
@@ -218,7 +218,7 @@ results.append(acc)
 getConfusion(y_test, pred, "logreg/"+word+"/ds1cfmatrix")
 np.savetxt("results/logreg/"+word+"/ds1traintest.txt",results,fmt="%.2f")
 
-boundary_plot = 0
+boundary_plot = 1
 
 if boundary_plot :
     X_train = data[:train_size,:2]
@@ -229,6 +229,7 @@ if boundary_plot :
     # Train scatter plot
     plt.plot(X_train[y_train==0][:,0],X_train[y_train==0][:,1],'.',c='r',label="class 0")
     plt.plot(X_train[y_train==1][:,0],X_train[y_train==1][:,1],'.',c='g',label="class 1")
+    plt.plot(X_train[y_train==2][:,0],X_train[y_train==2][:,1],'.',c='b',label="class 2")
 
     xy = np.mgrid[mini[0]:maxi[0]:0.1, mini[1]:maxi[1]:0.1].reshape(2,-1)
 
@@ -238,12 +239,16 @@ if boundary_plot :
 
     X_data = np.transpose(xy)
     X_data_std = get_standardization(X_data, mean, std, standard)
-    pred = np.squeeze(get_class(get_sigmoid(np.matmul(X_data_std,w))))
+
+    pred = get_sigmoid(np.matmul(X_data_std,w))
+    pred = np.argmax(pred, axis=1)
+
     plt.scatter(X_data[pred==0,0], X_data[pred==0,1], color='orangered')
     plt.scatter(X_data[pred==1,0], X_data[pred==1,1], color='lawngreen')
+    plt.scatter(X_data[pred==2,0], X_data[pred==2,1], color='deepskyblue')
     
     plt.xlabel("x1")
     plt.ylabel("y1")
-    plt.title("Decision boundary for Dataset 4")
+    plt.title("Decision boundary for Dataset 1")
 
     plt.savefig("results/logreg/"+word+"/ds1boundary")
