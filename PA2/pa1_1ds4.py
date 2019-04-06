@@ -40,7 +40,7 @@ def get_class(data) :
     return data
 
 # Compute confusion matrix
-def getConfusion(y_test, prediction, name) :
+def getConfusion(y_test, prediction, name, title) :
 
     # confusion matrix for test
     cnf_matrix = confusion_matrix(y_test, prediction)
@@ -49,7 +49,7 @@ def getConfusion(y_test, prediction, name) :
     # Plot non-normalized confusion matrix
     plt.figure()
     cf_mat.plot_confusion_matrix(cnf_matrix, classes=class_names)
-    plt.title("Dataset 4 - Test data")
+    plt.title(title)
     plt.savefig("results/"+name)
     # plt.show()
     return
@@ -192,7 +192,7 @@ results.append(acc)
 pred = get_sigmoid(np.matmul(X_test,w))
 acc = get_accuracy(get_class(pred),y_test)
 results.append(acc)
-getConfusion(y_test, pred, "logreg/"+word+"/ds4cfmatrix")
+getConfusion(y_test, pred, "logreg/"+word+"/ds4cfmatrix", "Dataset 4 - Test data")
 np.savetxt("results/logreg/"+word+"/ds4traintest.txt",results,fmt="%.2f")
 
 boundary_plot = 1

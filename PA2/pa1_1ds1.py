@@ -44,7 +44,7 @@ def get_class(data) :
     return np.argmax(np.divide(np.exp(data),np.sum(np.exp(data),axis=1).reshape(-1,1)))
     
 # Compute confusion matrix
-def getConfusion(y_test, prediction, name) :
+def getConfusion(y_test, prediction, name, title) :
     # confusion matrix for test
     cnf_matrix = confusion_matrix(np.argmax(y_test,axis=1), prediction)
     class_names = np.unique(prediction, return_counts=False)
@@ -52,7 +52,7 @@ def getConfusion(y_test, prediction, name) :
     # Plot non-normalized confusion matrix
     plt.figure()
     cf_mat.plot_confusion_matrix(cnf_matrix, classes=class_names)
-    plt.title("Dataset 4 - Test data")
+    plt.title(title)
     plt.savefig("results/"+name)
     # plt.show()
     return
@@ -96,7 +96,7 @@ print("Logistic Regression")
 print("Size of train, validation and test sets -",X_train.shape,X_val.shape,X_test.shape)
 print("Classes -",classes)
 
-standard = 1
+standard = 0
 iterations = [100,1000,10000]
 
 # hyperparameters 1
@@ -215,7 +215,7 @@ pred = np.argmax(y_test_pred, axis=1)
 acc = get_accuracy(pred,np.argmax(y_test,axis=1))
 results.append(acc)
 
-getConfusion(y_test, pred, "logreg/"+word+"/ds1cfmatrix")
+getConfusion(y_test, pred, "logreg/"+word+"/ds1cfmatrix", "Dataset 1 - Test data")
 np.savetxt("results/logreg/"+word+"/ds1traintest.txt",results,fmt="%.2f")
 
 boundary_plot = 1
