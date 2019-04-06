@@ -78,9 +78,9 @@ y_val = data[train_size:train_size+val_size,-1].reshape(-1,1)
 X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
 y_test = data[train_size+val_size:train_size+val_size+test_size,-1].reshape(-1,1)
 
-
-
-
+# compute mean and std of train data
+mini = np.min(X_train, axis=0)
+maxi = np.max(X_train, axis=0)
 
 print("Logistic Regression")
 print("Size of train, validation and test sets -",X_train.shape,X_val.shape,X_test.shape)
@@ -91,16 +91,16 @@ iterations = [100,1000,10000]
 
 # hyperparameters 1
 if standard : 
-    wt_inits = [2] # 0-zero weights, 1-non-zero constant weights, 2-random weights
-    lrs = [10**-5]
+    wt_init = 2 # 0-zero weights, 1-non-zero constant weights, 2-random weights
+    lr = 10**-5
     iteration = 50000
     lamdas = [0,100,0.001,0.01,0.1]
     degrees = [2,4,5,6]
     weight_init = ["Zero", "Constant", "Random uniform"]
     word = ""
 else :
-    wt_inits = [2] # 0-zero weights, 1-non-zero constant weights, 2-random weights
-    lrs = [10**-5]
+    wt_init = 2 # 0-zero weights, 1-non-zero constant weights, 2-random weights
+    lr = 10**-5
     iteration = 50000
     lamdas = [0,100,0.001,0.01,0.1]
     degrees = [2,4,5,6]
@@ -125,10 +125,7 @@ figs = 221
 
 results = []
 
-for degree in degrees :
-    lr = lrs[0]
-    wt_init = wt_inits[0]
-    
+for degree in degrees :   
     X_train = data[:train_size,:2]
     X_val = data[train_size:train_size+val_size,:2]
     X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
@@ -188,9 +185,14 @@ print("Best model has validation accuracy {:.2f}".format(np.max(np.array(val_acc
 print("Configurations are lamda, degree :",best_model[0],best_model[1])
 
 lamda = best_model[0]
+# lamda = 0.01
 degree = best_model[1]
+# degree = 4
 lamdas = [0,lamda,100]
 
+X_train = data[:train_size,:2]
+X_val = data[train_size:train_size+val_size,:2]
+X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
 # polynomial feature map
 poly = pf(degree)
 X_train = poly.fit_transform(X_train)
@@ -201,10 +203,10 @@ size = X_train.shape[1]
 
 results = []
 count = 0
-# Saving confusion matrix on test, accuracy on train and test data for best model
-w = get_wt_init(wt_init,size)
 
 for lamda in lamdas :
+    # Saving confusion matrix on test, accuracy on train and test data for best model
+    w = get_wt_init(wt_init,size)
     for i in range(iteration) :
         # Compute prediction based on current weight
         y_train_pred = get_sigmoid(np.matmul(X_train,w))
@@ -220,10 +222,10 @@ for lamda in lamdas :
     pred = get_sigmoid(np.matmul(X_test,w))
     acc = get_accuracy(get_class(pred),y_test)
     results.append(acc)
-    getConfusion(y_test, pred, "logreg/feature/"+word+"/ds2cfmatrix"+str(count),"Dataset 2 "+r"$\lambda=$"+str(lamda))
+    getConfusion(y_test, pred, "logreg/feature/"+word+"/ds2cfmatrix"+str(count)+str(degree),"Dataset 2 for "+r"$\lambda=$"+str(lamda)+",degree="+str(degree))
     np.savetxt("results/logreg/feature/"+word+"/ds2traintest.txt",results,fmt="%.2f")
     count+=1
-
+    print("Count ",count)
     boundary_plot = 1
 
     if boundary_plot :
@@ -243,14 +245,14 @@ for lamda in lamdas :
         class3x,class3y = [],[]
 
         X_data = np.transpose(xy)
-        X_data = poly.fit_transform(X_data)
+        X_data_plot = poly.fit_transform(X_data)
 
-        pred = np.squeeze(get_class(get_sigmoid(np.matmul(X_data,w))))
+        pred = np.squeeze(get_class(get_sigmoid(np.matmul(X_data_plot,w))))
         plt.scatter(X_data[pred==0,0], X_data[pred==0,1], color='orangered')
         plt.scatter(X_data[pred==1,0], X_data[pred==1,1], color='lawngreen')
         
         plt.xlabel("x1")
         plt.ylabel("y1")
-        plt.title("Decision boundary for Dataset 2 "+r"$\lambda=$"+str(lamda))
+        plt.title("Decision boundary for Dataset 2 for "+r"$\lambda=$"+str(lamda)+",degree="+str(degree))
 
-        plt.savefig("results/logreg/feature/"+word+"/ds2boundary"+str(count-1))
+        plt.savefig("results/logreg/feature/"+word+"/ds2boundary"+str(count-1)+str(degree))

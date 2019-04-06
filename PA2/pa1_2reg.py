@@ -203,7 +203,7 @@ for lamda in lamdas :
     pred = get_sigmoid(np.matmul(X_test,w))
     acc = get_accuracy(get_class(pred),y_test)
     results.append(acc)
-    getConfusion(y_test, pred, "logreg/regularisation/"+word+"/ds2cfmatrix"+str(count),"Dataset 2 "+r"$\lambda=$"+str(lamda))
+    getConfusion(y_test, pred, "logreg/regularisation/"+word+"/ds2cfmatrix"+str(count),"Dataset 2 for "+r"$\lambda=$"+str(lamda))
     np.savetxt("results/logreg/regularisation/"+word+"/ds2traintest.txt",results,fmt="%.2f")
     count+=1
 
@@ -233,6 +233,6 @@ for lamda in lamdas :
         
         plt.xlabel("x1")
         plt.ylabel("y1")
-        plt.title("Decision boundary for Dataset 2 "+r"$\lambda=$"+str(lamda))
+        plt.title("Decision boundary for Dataset 2 for "+r"$\lambda=$"+str(lamda))
 
         plt.savefig("results/logreg/regularisation/"+word+"/ds2boundary"+str(count-1))
