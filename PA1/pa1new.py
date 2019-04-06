@@ -12,7 +12,7 @@ import functions as f
 np.random.seed(seed=42)
 
 # Compute confusion matrix
-def getConfusion(y_test, prediction, name) :
+def getConfusion(y_teshttps://chrome.google.com/webstore/detail/picture-in-picture-extens/hkgfoiooedgoejojocmhlaklaeopbecgt, prediction, name) :
     # confusion matrix for test
     cnf_matrix = confusion_matrix(y_test, prediction)
     class_names = np.unique(prediction, return_counts=False)

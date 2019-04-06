@@ -12,15 +12,20 @@ def get_sigmoid(z) :
     sig = 1/(1+np.exp(-z))
     return sig
 
-def get_wt_init(wt_init,size) :
+def get_wt_init(wt_init,size,classes) :
     if wt_init == 0 :
-        w = np.zeros((size,1))
+        w = np.zeros((size,classes))
     elif wt_init == 1 :
-        w = np.ones((size,1))
+        w = np.ones((size,classes))
     elif wt_init == 2 :
-        w = np.random.uniform(low=0,high=1,size=(size,1))
-    elif wt_init == 3 :
-        w = np.random.standard_normal((size,1))
+        w = []
+        # print(size)
+        # w.append(np.random.uniform(low=0,high=1,size=size))
+        # w.append(np.random.uniform(low=0,high=1,size=size))
+        # w.append(np.random.uniform(low=0,high=1,size=size))
+        
+        # w = np.transpose(np.array(w))
+        w = np.random.uniform(low=0,high=1,size=(size,classes))
     return w
 
 def get_standardization(data,mean,std,standard) :
@@ -35,15 +40,13 @@ def get_description(data) :
     return mean, std
 
 def get_class(data) :
-    data[data>=0.5] = 1
-    data[data<0.5] = 0
-    return data
-
+    # data should be n*3, returns probability values
+    return np.argmax(np.divide(np.exp(data),np.sum(np.exp(data),axis=1).reshape(-1,1)))
+    
 # Compute confusion matrix
 def getConfusion(y_test, prediction, name) :
-
     # confusion matrix for test
-    cnf_matrix = confusion_matrix(y_test, prediction)
+    cnf_matrix = confusion_matrix(np.argmax(y_test,axis=1), prediction)
     class_names = np.unique(prediction, return_counts=False)
     np.set_printoptions(precision=2)
     # Plot non-normalized confusion matrix
@@ -54,10 +57,16 @@ def getConfusion(y_test, prediction, name) :
     # plt.show()
     return
 
+def get_encoding(data,classes) :
+    data = np.squeeze(data.astype(int))
+    encoded = np.zeros((data.shape[0],classes))
+    encoded[np.arange(data.shape[0]),data]=1
+    return encoded
+
 np.random.seed(seed=42)
 
 # read dataset
-data = np.loadtxt("../Datasets_PRML_A2/Dataset_4_Team_39.csv", delimiter=',', dtype=None)
+data = np.loadtxt("../Datasets_PRML_A2/Dataset_1_Team_39.csv", delimiter=',', dtype=None)
 classes = np.array(np.unique(data[:,2], return_counts=False),dtype=int)
 
 # shuffling
@@ -87,28 +96,28 @@ print("Logistic Regression")
 print("Size of train, validation and test sets -",X_train.shape,X_val.shape,X_test.shape)
 print("Classes -",classes)
 
-standard = 1
+standard = 0
 iterations = [100,1000,10000]
 
 # hyperparameters 1
 if standard : 
     wt_inits = [0,1,2] # 0-zero weights, 1-non-zero constant weights, 2-random weights
-    lrs = [10**-4,0.001,0.01,0.1,1]
-    iteration = 500
+    lrs = [10**-4,0.001,0.01,0.1]
+    iteration = 1000
     weight_init = ["Zero", "Constant", "Random uniform"]
     word = "withstd"
 else :
     wt_inits = [0,1,2] # 0-zero weights, 1-non-zero constant weights, 2-random weights
-    lrs = [10**-8, 10**-7,10**-5]
-    iteration = 10000
+    lrs = [10**-8,10**-7]
+    iteration = 20000
     weight_init = ["Zero", "Constant", "Random uniform"]
     word = "withoutstd"
 
 default = 0
 
 if default :
-    wt_inits = [wt_inits[0]]
-    lrs = [lrs[0]]
+    wt_inits = [wt_inits[2]]
+    # lrs = [lrs[0]]
     iterations = [iterations[0]]
 
 configs = []
@@ -127,36 +136,46 @@ X_test = get_standardization(X_test, mean, std, standard)
 
 figs = 221
 
+y_train = get_encoding(y_train,len(classes))
+y_val = get_encoding(y_val,len(classes))
+y_test = get_encoding(y_test,len(classes))
+results = []
+
 for wt_init in wt_inits :
     # plt.figure()
     for lr in lrs :
-        w = get_wt_init(wt_init,size)
+        result = []
+        w = get_wt_init(wt_init,size,len(classes))
         iteration_training = []
         for i in range(iteration) :
             # Compute prediction based on current weight
             y_train_pred = get_sigmoid(np.matmul(X_train,w))
             # compute gradient of cross-entropy loss for binary classification
-            grad_err = np.matmul( np.transpose(X_train),y_train_pred-y_train)
+            grad_err = np.matmul(np.transpose(X_train),y_train_pred-y_train)
             # accuracy of current prediction
-            train_acc = get_accuracy(get_class(y_train_pred),y_train)
+            y_train_pred = np.argmax(y_train_pred, axis=1)
+            train_acc = get_accuracy(y_train_pred,np.argmax(y_train,axis=1))
             # prediction on validation set
             y_val_pred = get_sigmoid(np.matmul(X_val,w))
+            y_val_pred = np.argmax(y_val_pred, axis=1)
             # accuracy on validation set
-            val_acc = get_accuracy(get_class(y_val_pred),y_val)
+            val_acc = get_accuracy(y_val_pred,np.argmax(y_val,axis=1))
             # Update rule
             w -= (lr*grad_err)
             # Accuracy values
-            # print("Train accuracy {:.2f}".format(train_acc))
-            # print("Validation accuracy {:.2f}".format(val_acc))
+            print("Train accuracy {:.2f}".format(train_acc))
+            print("Validation accuracy {:.2f}".format(val_acc))
             iteration_training.append(train_acc)
         
         train_accuracies.append(train_acc)
         val_accuracies.append(val_acc)
         configs.append([wt_init, lr])
-        
+        result.append(train_acc)
         plt.subplot(figs)
         plt.plot(total_iterations,iteration_training,label="lr="+str(lr))
-    
+        
+    results.append(np.max(np.array(result)))
+
     figs+=1
     # plt.axis([0,iteration,0,100])
     plt.title(weight_init[wt_init]+" weight initialization",size=8)
@@ -167,8 +186,8 @@ for wt_init in wt_inits :
         plt.xlabel("Iterations",size=8)
     plt.tight_layout()
     plt.legend()
-    # plt.savefig("results/logreg/withoutstd/ds4"+weight_init[wt_init])
-plt.savefig("results/logreg/"+word+"/ds4accuracy")
+
+plt.savefig("results/logreg/"+word+"/ds1accuracy")
 idx = np.argmax(np.array(val_accuracies))
 best_model = configs[idx]
 print("Best model has validation accuracy {:.2f}".format(np.max(np.array(val_accuracies))))
@@ -177,16 +196,29 @@ wt_init = best_model[0]
 lr = best_model[1]
 results = []
 # Saving confusion matrix on test, accuracy on train and test data for best model
-pred = get_class(get_sigmoid(np.matmul(X_train,w)))
-acc = get_accuracy(pred,y_train)
-results.append(acc)
-pred = get_sigmoid(np.matmul(X_test,w))
-acc = get_accuracy(get_class(pred),y_test)
-results.append(acc)
-getConfusion(y_test, pred, "logreg/"+word+"/ds4cfmatrix")
-np.savetxt("results/logreg/"+word+"/ds4traintest.txt",results,fmt="%.2f")
+w = get_wt_init(wt_init,size,len(classes))
+for i in range(iteration) :
+    # Compute prediction based on current weight
+    y_train_pred = get_sigmoid(np.matmul(X_train,w))
+    # compute gradient of cross-entropy loss for binary classification
+    grad_err = np.matmul(np.transpose(X_train),y_train_pred-y_train)
+    # Update rule
+    w -= (lr*grad_err)
 
-boundary_plot = 1
+y_train_pred = get_sigmoid(np.matmul(X_train,w))
+pred = np.argmax(y_train_pred, axis=1)
+acc = get_accuracy(pred,np.argmax(y_train,axis=1))
+results.append(acc)
+
+y_test_pred = get_sigmoid(np.matmul(X_test,w))
+pred = np.argmax(y_test_pred, axis=1)
+acc = get_accuracy(pred,np.argmax(y_test,axis=1))
+results.append(acc)
+
+getConfusion(y_test, pred, "logreg/"+word+"/ds1cfmatrix")
+np.savetxt("results/logreg/"+word+"/ds1traintest.txt",results,fmt="%.2f")
+
+boundary_plot = 0
 
 if boundary_plot :
     X_train = data[:train_size,:2]
@@ -214,4 +246,4 @@ if boundary_plot :
     plt.ylabel("y1")
     plt.title("Decision boundary for Dataset 4")
 
-    plt.savefig("results/logreg/"+word+"/ds4boundary")
+    plt.savefig("results/logreg/"+word+"/ds1boundary")
