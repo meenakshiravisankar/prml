@@ -21,7 +21,7 @@ def getConfusion(y, pred, name) :
     # Plot non-normalized confusion matrix
     plt.figure()
     cf_mat.plot_confusion_matrix(cnf_matrix, classes=class_names,title=name)
-    plt.savefig("results/"+name)
+    plt.savefig("results/svm/"+name)
     return
 
 # calculate the accuracy of classification
@@ -108,14 +108,14 @@ for i in range(len(C_vals)):
 
     plt.xlabel("Feature 1")
     plt.ylabel("Feature 2")
-    plt.savefig("results/SVM_Dataset4_boundary"+str(i))
+    plt.savefig("results/svm/DS4_boundary"+str(i))
 
     # evaluating the confusion matrix
-    getConfusion(y_test, y_pred_t, "SVM_Dataset4_"+str(i))
+    getConfusion(y_test, y_pred_t, "DS4_"+str(i))
 
-np.savetxt('results/SVM_train_acc_ds4',acc_train_data1,fmt='%.2f')
-np.savetxt('results/SVM_val_acc_ds4',acc_val_data1,fmt='%.2f')
-np.savetxt('results/SVM_test_acc_ds4',acc_test_data1,fmt='%.2f')
+np.savetxt('results/svm/Train_acc_ds4',acc_train_data1,fmt='%.2f')
+np.savetxt('results/svm/Val_acc_ds4',acc_val_data1,fmt='%.2f')
+np.savetxt('results/svm/Test_acc_ds4',acc_test_data1,fmt='%.2f')
 
 # reading the dataset
 data2 = np.loadtxt("../Datasets_PRML_A2/Dataset_5_Team_39.csv", delimiter=',', dtype=None)
@@ -144,7 +144,7 @@ acc_test_data2 = []
 for i in range(len(C_vals)):
     # training an sklearn SVM using the data
     svclassifier = SVC(C=C_vals[i], kernel='linear')
-    svclassifier.fit(X_train, y_train)
+    clf = svclassifier.fit(X_train, y_train)
     sv = svclassifier.support_vectors_
 
     # finding the train accuracies
@@ -182,11 +182,11 @@ for i in range(len(C_vals)):
 
     plt.xlabel("Feature 1")
     plt.ylabel("Feature 2")
-    plt.savefig("results/SVM_Dataset5_boundary"+str(i))
+    plt.savefig("results/svm/DS5_boundary"+str(i))
 
     # evaluating the confusion matrix
-    getConfusion(y_test, y_pred_t, "SVM_Dataset5_"+str(i))
+    getConfusion(y_test, y_pred_t, "DS5_"+str(i))
 
-np.savetxt('results/SVM_train_acc_ds5',acc_train_data2,fmt='%.2f')
-np.savetxt('results/SVM_val_acc_ds5',acc_val_data2,fmt='%.2f')
-np.savetxt('results/SVM_test_acc_ds5',acc_test_data2,fmt='%.2f')
+np.savetxt('results/svm/Train_acc_ds5',acc_train_data2,fmt='%.2f')
+np.savetxt('results/svm/Val_acc_ds5',acc_val_data2,fmt='%.2f')
+np.savetxt('results/svm/Test_acc_ds5',acc_test_data2,fmt='%.2f')
