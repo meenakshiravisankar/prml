@@ -102,12 +102,12 @@ for i in range(len(C_vals)):
 
     plt.xlabel("Feature 1")
     plt.ylabel("Feature 2")
-    plt.savefig("results/SVM_Dataset3_boundary_linear_kernel_"+str(i))
+    plt.savefig("results/svmlinker/SVM_Dataset3_boundary_linear_kernel_"+str(i))
     plt.clf()
 
-np.savetxt('results/SVM_linear_kernel_train_acc_ds3',acc_linear_train,fmt='%.2f')
-np.savetxt('results/SVM_linear_kernel_val_acc_ds3',acc_linear_val,fmt='%.2f')
-np.savetxt('results/SVM_linear_kernel_test_acc_ds3',acc_linear_test,fmt='%.2f')
+np.savetxt('results/svmlinker/SVM_linear_kernel_train_acc_ds3',acc_linear_train,fmt='%.2f')
+np.savetxt('results/svmlinker/SVM_linear_kernel_val_acc_ds3',acc_linear_val,fmt='%.2f')
+np.savetxt('results/svmlinker/SVM_linear_kernel_test_acc_ds3',acc_linear_test,fmt='%.2f')
 
 acc_poly_train = []
 acc_poly_val = []
@@ -156,12 +156,12 @@ for i in range(len(degrees)):
 
         plt.xlabel("Feature 1")
         plt.ylabel("Feature 2")
-        plt.savefig("results/SVM_Dataset3_boundary_poly_kernel_degreeInd_"+str(i)+"_CInd_"+str(j))
+        plt.savefig("results/svmpolyker/SVM_Dataset3_boundary_poly_kernel_degreeInd_"+str(i)+"_CInd_"+str(j))
         plt.clf()
 
-    np.savetxt('results/SVM_poly_kernel_train_acc_ds3',acc_poly_train,fmt='%.2f')
-    np.savetxt('results/SVM_poly_kernel_val_acc_ds3',acc_poly_val,fmt='%.2f')
-    np.savetxt('results/SVM_poly_kernel_test_acc_ds3',acc_poly_test,fmt='%.2f')
+    np.savetxt('results/svmpolyker/SVM_poly_kernel_train_acc_ds3',acc_poly_train,fmt='%.2f')
+    np.savetxt('results/svmpolyker/SVM_poly_kernel_val_acc_ds3',acc_poly_val,fmt='%.2f')
+    np.savetxt('results/svmpolyker/SVM_poly_kernel_test_acc_ds3',acc_poly_test,fmt='%.2f')
 
 acc_rbf_train = []
 acc_rbf_val = []
@@ -210,9 +210,9 @@ for i in range(len(gammas)):
 
         plt.xlabel("Feature 1")
         plt.ylabel("Feature 2")
-        plt.savefig("results/SVM_Dataset3_boundary_rbf_kernel_gammaInd_"+str(i)+"_CInd_"+str(j))
+        plt.savefig("results/svmrbfker/SVM_Dataset3_boundary_rbf_kernel_gammaInd_"+str(i)+"_CInd_"+str(j))
         plt.clf()
 
-    np.savetxt('results/SVM_rbf_kernel_train_acc_ds3',acc_rbf_train,fmt='%.2f')
-    np.savetxt('results/SVM_rbf_kernel_val_acc_ds3',acc_rbf_val,fmt='%.2f')
-    np.savetxt('results/SVM_rbf_kernel_test_acc_ds3',acc_rbf_test,fmt='%.2f')
+    np.savetxt('results/svmrbfker/SVM_rbf_kernel_train_acc_ds3',acc_rbf_train,fmt='%.2f')
+    np.savetxt('results/svmrbfker/SVM_rbf_kernel_val_acc_ds3',acc_rbf_val,fmt='%.2f')
+    np.savetxt('results/svmrbfker/SVM_rbf_kernel_test_acc_ds3',acc_rbf_test,fmt='%.2f')
