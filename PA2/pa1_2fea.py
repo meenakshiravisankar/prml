@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import warnings
 import confusion_matrix as cf_mat
 from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import PolynomialFeatures as pf
+
 
 # calculate the accuracy of classification
 def get_accuracy(pred, y):
@@ -76,10 +78,9 @@ y_val = data[train_size:train_size+val_size,-1].reshape(-1,1)
 X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
 y_test = data[train_size+val_size:train_size+val_size+test_size,-1].reshape(-1,1)
 
-# compute mean and std of train data
-mini = np.min(X_train, axis=0)
-maxi = np.max(X_train, axis=0)
-mean,std = get_description(X_train)
+
+
+
 
 print("Logistic Regression")
 print("Size of train, validation and test sets -",X_train.shape,X_val.shape,X_test.shape)
@@ -90,104 +91,120 @@ iterations = [100,1000,10000]
 
 # hyperparameters 1
 if standard : 
-    wt_inits = [0,1,2] # 0-zero weights, 1-non-zero constant weights, 2-random weights
-    lrs = [10**-4,0.001,0.01]
-    iteration = 500
-    lamdas = [0,100,0.01,0.1,1]
+    wt_inits = [2] # 0-zero weights, 1-non-zero constant weights, 2-random weights
+    lrs = [10**-5]
+    iteration = 50000
+    lamdas = [0,100,0.001,0.01,0.1]
+    degrees = [2,4,5,6]
     weight_init = ["Zero", "Constant", "Random uniform"]
     word = ""
 else :
     wt_inits = [2] # 0-zero weights, 1-non-zero constant weights, 2-random weights
-    lrs = [10**-5,0.0001,0.001]
-    iteration = 20000
+    lrs = [10**-5]
+    iteration = 50000
     lamdas = [0,100,0.001,0.01,0.1]
+    degrees = [2,4,5,6]
     weight_init = ["Zero", "Constant", "Random uniform"]
     word = ""
 
-default = 1
+default = 0
 
 if default :
-    # wt_inits = [wt_inits[0]]
+    wt_inits = [wt_inits[2]]
     lrs = [10**-5]
     iterations = [iterations[0]]
 
 configs = []
 
-# Initialisation of weights
 size = X_train.shape[1]
-
 train_accuracies = []
 val_accuracies = []
-
 total_iterations = [x for x in range(iteration)]
-
-X_train = get_standardization(X_train, mean, std, standard)
-X_val = get_standardization(X_val, mean, std, standard)
-X_test = get_standardization(X_test, mean, std, standard)
 
 figs = 221
 
 results = []
 
-for lr in lrs :
-    for wt_init in wt_inits :
-        for lamda in lamdas :
-        # plt.figure()
-            w = get_wt_init(wt_init,size)
-            iteration_training = []
-            for i in range(iteration) :
-                # Compute prediction based on current weight
-                y_train_pred = get_sigmoid(np.matmul(X_train,w))
-                # compute gradient of cross-entropy loss for binary classification
-                grad_err = np.matmul(np.transpose(X_train),y_train_pred-y_train)+lamda*w
-                # accuracy of current prediction
-                train_acc = get_accuracy(get_class(y_train_pred),y_train)
-                # prediction on validation set
-                y_val_pred = get_sigmoid(np.matmul(X_val,w))
-                # accuracy on validation set
-                val_acc = get_accuracy(get_class(y_val_pred),y_val)
-                # Update rule
-                w -= (lr*grad_err)
-                # Accuracy values
-                # print("Train accuracy {:.2f}".format(train_acc))
-                # print("Validation accuracy {:.2f}".format(val_acc))
-                iteration_training.append(train_acc)
-            
-            train_accuracies.append(train_acc)
-            val_accuracies.append(val_acc)
-            configs.append([lamda, lr, wt_init,val_acc])
-            
-            plt.subplot(figs)
-            plt.plot(total_iterations,iteration_training,label=r"$\lambda=$"+str(lamda))
+for degree in degrees :
+    lr = lrs[0]
+    wt_init = wt_inits[0]
+    
+    X_train = data[:train_size,:2]
+    X_val = data[train_size:train_size+val_size,:2]
+    X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
 
-        figs+=1
-        plt.title("Learning rate "+str(lr),size=8)
-        plt.axis(size=8)
-        if figs == 222 :
-            plt.ylabel("Accuracy",size=8)
-        if figs == 225 :
-            plt.xlabel("Iterations",size=8)
-        plt.tight_layout()
-        plt.legend()
-        # plt.savefig("results/logreg/regularisation/withoutstd/ds2"+weight_init[wt_init])
-np.savetxt("results/logreg/regularisation/bestlamda", configs)
+    # polynomial feature map
+    poly = pf(degree)
+    X_train = poly.fit_transform(X_train)
+    X_val = poly.fit_transform(X_val)
+    size = X_train.shape[1]
+
+    for lamda in lamdas :
+    # plt.figure()
+        w = get_wt_init(wt_init,size)
+        iteration_training = []
+        for i in range(iteration) :
+            # Compute prediction based on current weight
+            y_train_pred = get_sigmoid(np.matmul(X_train,w))
+            # compute gradient of cross-entropy loss for binary classification
+            grad_err = np.matmul(np.transpose(X_train),y_train_pred-y_train)+lamda*w
+            # accuracy of current prediction
+            train_acc = get_accuracy(get_class(y_train_pred),y_train)
+            # prediction on validation set
+            y_val_pred = get_sigmoid(np.matmul(X_val,w))
+            # accuracy on validation set
+            val_acc = get_accuracy(get_class(y_val_pred),y_val)
+            # Update rule
+            w -= (lr*grad_err)
+            # Accuracy values
+            # print("Train accuracy {:.2f}".format(train_acc))
+            # print("Validation accuracy {:.2f}".format(val_acc))
+            iteration_training.append(train_acc)
+        print("degree,lamda",degree,lamda)
+        train_accuracies.append(train_acc)
+        val_accuracies.append(val_acc)
+        configs.append([lamda, degree,val_acc])
+        
+        plt.subplot(figs)
+        plt.plot(total_iterations,iteration_training,label=r"$\lambda=$"+str(lamda))
+
+    figs+=1
+    plt.title("Degree of polynomial "+str(degree),size=8)
+    plt.axis(size=8)
+    if figs == 222 :
+        plt.ylabel("Accuracy",size=8)
+    if figs == 225 :
+        plt.xlabel("Iterations",size=8)
+    plt.tight_layout()
+    plt.legend()
+
+# plt.savefig("results/logreg/feature/withoutstd/ds2"+weight_init[wt_init])
+np.savetxt("results/logreg/feature/bestlamda", configs)
 if default==0 :
-    plt.savefig("results/logreg/regularisation/"+"/ds2accuracy")
+    plt.savefig("results/logreg/feature/"+"/ds2accuracy")
 idx = np.argmax(np.array(val_accuracies))
 best_model = configs[idx]
 print("Best model has validation accuracy {:.2f}".format(np.max(np.array(val_accuracies))))
-print("Configurations are lamda, lr, initialization :",best_model[0],best_model[1],weight_init[best_model[2]])
+print("Configurations are lamda, degree :",best_model[0],best_model[1])
+
 lamda = best_model[0]
-lr = best_model[1]
-wt_init = best_model[2]
+degree = best_model[1]
 lamdas = [0,lamda,100]
+
+# polynomial feature map
+poly = pf(degree)
+X_train = poly.fit_transform(X_train)
+X_val = poly.fit_transform(X_val)
+X_test = poly.fit_transform(X_test)
+
+size = X_train.shape[1]
 
 results = []
 count = 0
 # Saving confusion matrix on test, accuracy on train and test data for best model
+w = get_wt_init(wt_init,size)
 
 for lamda in lamdas :
-    w = get_wt_init(wt_init,size)
     for i in range(iteration) :
         # Compute prediction based on current weight
         y_train_pred = get_sigmoid(np.matmul(X_train,w))
@@ -203,8 +220,8 @@ for lamda in lamdas :
     pred = get_sigmoid(np.matmul(X_test,w))
     acc = get_accuracy(get_class(pred),y_test)
     results.append(acc)
-    getConfusion(y_test, pred, "logreg/regularisation/"+word+"/ds2cfmatrix"+str(count),"Dataset 2 "+r"$\lambda=$"+str(lamda))
-    np.savetxt("results/logreg/regularisation/"+word+"/ds2traintest.txt",results,fmt="%.2f")
+    getConfusion(y_test, pred, "logreg/feature/"+word+"/ds2cfmatrix"+str(count),"Dataset 2 "+r"$\lambda=$"+str(lamda))
+    np.savetxt("results/logreg/feature/"+word+"/ds2traintest.txt",results,fmt="%.2f")
     count+=1
 
     boundary_plot = 1
@@ -226,8 +243,9 @@ for lamda in lamdas :
         class3x,class3y = [],[]
 
         X_data = np.transpose(xy)
-        X_data_std = get_standardization(X_data, mean, std, standard)
-        pred = np.squeeze(get_class(get_sigmoid(np.matmul(X_data_std,w))))
+        X_data = poly.fit_transform(X_data)
+
+        pred = np.squeeze(get_class(get_sigmoid(np.matmul(X_data,w))))
         plt.scatter(X_data[pred==0,0], X_data[pred==0,1], color='orangered')
         plt.scatter(X_data[pred==1,0], X_data[pred==1,1], color='lawngreen')
         
@@ -235,4 +253,4 @@ for lamda in lamdas :
         plt.ylabel("y1")
         plt.title("Decision boundary for Dataset 2 "+r"$\lambda=$"+str(lamda))
 
-        plt.savefig("results/logreg/regularisation/"+word+"/ds2boundary"+str(count-1))
+        plt.savefig("results/logreg/feature/"+word+"/ds2boundary"+str(count-1))
