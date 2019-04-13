@@ -121,10 +121,10 @@ axes.scatter(best_sv_1[:, 0], best_sv_1[:, 1], s=100, linewidth=1, facecolors='n
 
 plt.xlabel("Feature 1")
 plt.ylabel("Feature 2")
-plt.savefig("results/svm/DS4_boundary"+str(i))
+plt.savefig("results/svm/DS4_boundary_svm"+str(i))
 
 # evaluating the confusion matrix
-getConfusion(y_test, best_svclassifier_1.predict(X_test), "DS4_best_model")
+getConfusion(y_test, best_svclassifier_1.predict(X_test), "DS4_best_model_svm")
 
 print("Best model for Dataset 4:")
 print("C:", best_model_C_1)
@@ -212,10 +212,10 @@ axes.scatter(best_sv_2[:, 0], best_sv_2[:, 1], s=100, linewidth=1, facecolors='n
 
 plt.xlabel("Feature 1")
 plt.ylabel("Feature 2")
-plt.savefig("results/svm/DS5_boundary"+str(i))
+plt.savefig("results/svm/DS5_boundary_svm"+str(i))
 
 # evaluating the confusion matrix
-getConfusion(y_test, best_svclassifier_2.predict(X_test), "DS5_best_model")
+getConfusion(y_test, best_svclassifier_2.predict(X_test), "DS5_best_model_svm")
 
 print("Best model for Dataset 5:")
 print("C:", best_model_C_2)
