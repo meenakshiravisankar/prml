@@ -7,7 +7,7 @@
 - [x] In kernel, vary gamma in rbf, p in polynomial
 - [x] Scatter plots 5 datasets + 1 showing class in single plot
 - [x] decision boundaries in svm
-- [ ] perceptron for image dataset
+- [x] perceptron for image dataset
 
 Doubts
 - [x] SVM library

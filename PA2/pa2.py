@@ -149,14 +149,6 @@ sns.scatterplot(x=X_train[:, 0], y=X_train[:, 1], hue=list(map(getName,y_train))
 slope = -(best_model_wt_1[0]+0.0)/(best_model_wt_1[1]+0.0)
 sns.lineplot(x=X_train[:, 0], y=slope*X_train[:, 0])
 
-# # getting the axes information of the plot
-# axes = plt.gca()
-# xlim = axes.get_xlim()
-# ylim = axes.get_ylim()
-#
-# # plotting the decision boundary line
-# axes.scatter(X_train[:, 0], slope*X_train[:, 0], s=100, linewidth=1, facecolors='none', edgecolors='k')
-#
 plt.xlabel("Feature 1")
 plt.ylabel("Feature 2")
 plt.savefig("results/perceptron/DS2_boundary_perceptron")
@@ -240,15 +232,6 @@ sns.scatterplot(x=X_train[:, 0], y=X_train[:, 1], hue=list(map(getName,y_train))
 # slope of the decision boundary line
 slope = -(best_model_wt_1[0]+0.0)/(best_model_wt_1[1]+0.0)
 sns.lineplot(x=X_train[:, 0], y=slope*X_train[:, 0])
-
-# # getting the axes information of the plot
-# axes = plt.gca()
-# xlim = axes.get_xlim()
-# ylim = axes.get_ylim()
-#
-# # plotting the decision boundary line
-# axes.scatter(X_train[:, 0], slope*X_train[:, 0], s=100, linewidth=1, facecolors='none', edgecolors='k')
-#
 
 plt.xlabel("Feature 1")
 plt.ylabel("Feature 2")
