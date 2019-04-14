@@ -141,7 +141,7 @@ best_sv_2 = None
 for i in range(len(degrees)):
     for j in range(len(C_vals)):
         # training an sklearn SVM using the data
-        svclassifier = SVC(C=C_vals[j], kernel='poly', degree=degrees[i])
+        svclassifier = SVC(C=C_vals[j], kernel='poly', coef0=1, degree=degrees[i])
         svclassifier.fit(X_train, y_train)
         sv = svclassifier.support_vectors_
 
