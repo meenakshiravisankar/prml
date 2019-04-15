@@ -67,6 +67,12 @@ acc_train_data1 = []
 acc_val_data1 = []
 acc_test_data1 = []
 
+# storing the best model parameters (C) and best model validation accuracy
+best_model_C_1 = 0
+best_val_acc_1 = 0
+best_svclassifier_1 = None
+best_sv_1 = None
+
 for i in range(len(C_vals)):
     # training an sklearn SVM using the data
     svclassifier = SVC(C=C_vals[i], kernel='linear')
@@ -79,39 +85,50 @@ for i in range(len(C_vals)):
 
     # finding the validation accuracies
     y_pred_v = svclassifier.predict(X_val)
-    acc_val_data1.append(accuracy(y_pred_v, y_val))
+    ac = accuracy(y_pred_v, y_val)
+    acc_val_data1.append(ac)
+
+    if (ac > best_val_acc_1):
+        best_val_acc_1 = ac
+        best_model_C_1 = C_vals[i]
+        best_svclassifier_1 = svclassifier
+        best_sv_1 = sv
 
     # finding the test accuracies
     y_pred_t = svclassifier.predict(X_test)
     acc_test_data1.append(accuracy(y_pred_t, y_test))
 
-    f = plt.figure()
-    sns.scatterplot(x=X_train[:, 0], y=X_train[:, 1], hue=list(map(getName,y_train)))
+f = plt.figure()
+sns.scatterplot(x=X_train[:, 0], y=X_train[:, 1], hue=list(map(getName,y_train)))
 
-    # getting the axes information of the plot
-    axes = plt.gca()
-    xlim = axes.get_xlim()
-    ylim = axes.get_ylim()
+# getting the axes information of the plot
+axes = plt.gca()
+xlim = axes.get_xlim()
+ylim = axes.get_ylim()
 
-    # creating a grid to help plot the decision function
-    xx = np.linspace(xlim[0], xlim[1], 30)
-    yy = np.linspace(ylim[0], ylim[1], 30)
-    YY, XX = np.meshgrid(yy, xx)
-    xy = np.transpose(np.vstack([XX.ravel(), YY.ravel()]))
-    Z = svclassifier.decision_function(xy).reshape(XX.shape)
+# creating a grid to help plot the decision function
+xx = np.linspace(xlim[0], xlim[1], 30)
+yy = np.linspace(ylim[0], ylim[1], 30)
+YY, XX = np.meshgrid(yy, xx)
+xy = np.transpose(np.vstack([XX.ravel(), YY.ravel()]))
+Z = best_svclassifier_1.decision_function(xy).reshape(XX.shape)
 
-    # plotting decision boundary and margins
-    axes.contour(XX, YY, Z, colors='k', levels=[-1, 0, 1], alpha=0.5, linestyles=['--', '-', '--'])
+# plotting decision boundary and margins
+axes.contour(XX, YY, Z, colors='k', levels=[-1, 0, 1], alpha=0.5, linestyles=['--', '-', '--'])
 
-    # plotting support vectors
-    axes.scatter(sv[:, 0], sv[:, 1], s=100, linewidth=1, facecolors='none', edgecolors='k')
+# plotting support vectors
+axes.scatter(best_sv_1[:, 0], best_sv_1[:, 1], s=100, linewidth=1, facecolors='none', edgecolors='k')
 
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
-    plt.savefig("results/svm/DS4_boundary"+str(i))
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.savefig("results/svm/DS4_boundary_svm")
 
-    # evaluating the confusion matrix
-    getConfusion(y_test, y_pred_t, "DS4_"+str(i))
+# evaluating the confusion matrix
+getConfusion(y_test, best_svclassifier_1.predict(X_test), "DS4_best_model_svm")
+
+print("Best model for Dataset 4:")
+print("C:", best_model_C_1)
+print("Validation Accuracy:", best_val_acc_1)
 
 np.savetxt('results/svm/Train_acc_ds4',acc_train_data1,fmt='%.2f')
 np.savetxt('results/svm/Val_acc_ds4',acc_val_data1,fmt='%.2f')
@@ -141,6 +158,12 @@ acc_train_data2 = []
 acc_val_data2 = []
 acc_test_data2 = []
 
+# storing the best model parameters (C) and best model validation accuracy
+best_model_C_2 = 0
+best_val_acc_2 = 0
+best_svclassifier_2 = None
+best_sv_2 = None
+
 for i in range(len(C_vals)):
     # training an sklearn SVM using the data
     svclassifier = SVC(C=C_vals[i], kernel='linear')
@@ -153,39 +176,50 @@ for i in range(len(C_vals)):
 
     # finding the validation accuracies
     y_pred_v = svclassifier.predict(X_val)
-    acc_val_data2.append(accuracy(y_pred_v, y_val))
+    ac = accuracy(y_pred_v, y_val)
+    acc_val_data2.append(ac)
+
+    if (ac > best_val_acc_2):
+        best_val_acc_2 = ac
+        best_model_C_2 = C_vals[i]
+        best_svclassifier_2 = svclassifier
+        best_sv_2 = sv
 
     # finding the test accuracies
     y_pred_t = svclassifier.predict(X_test)
     acc_test_data2.append(accuracy(y_pred_t, y_test))
 
-    f = plt.figure()
-    sns.scatterplot(x=X_train[:, 0], y=X_train[:, 1], hue=list(map(getName,y_train)))
+f = plt.figure()
+sns.scatterplot(x=X_train[:, 0], y=X_train[:, 1], hue=list(map(getName,y_train)))
 
-    # getting the axes information of the plot
-    axes = plt.gca()
-    xlim = axes.get_xlim()
-    ylim = axes.get_ylim()
+# getting the axes information of the plot
+axes = plt.gca()
+xlim = axes.get_xlim()
+ylim = axes.get_ylim()
 
-    # creating a grid to help plot the decision function
-    xx = np.linspace(xlim[0], xlim[1], 30)
-    yy = np.linspace(ylim[0], ylim[1], 30)
-    YY, XX = np.meshgrid(yy, xx)
-    xy = np.transpose(np.vstack([XX.ravel(), YY.ravel()]))
-    Z = svclassifier.decision_function(xy).reshape(XX.shape)
+# creating a grid to help plot the decision function
+xx = np.linspace(xlim[0], xlim[1], 30)
+yy = np.linspace(ylim[0], ylim[1], 30)
+YY, XX = np.meshgrid(yy, xx)
+xy = np.transpose(np.vstack([XX.ravel(), YY.ravel()]))
+Z = best_svclassifier_2.decision_function(xy).reshape(XX.shape)
 
-    # plotting decision boundary and margins
-    axes.contour(XX, YY, Z, colors='k', levels=[-1, 0, 1], alpha=0.5, linestyles=['--', '-', '--'])
+# plotting decision boundary and margins
+axes.contour(XX, YY, Z, colors='k', levels=[-1, 0, 1], alpha=0.5, linestyles=['--', '-', '--'])
 
-    # plotting support vectors
-    axes.scatter(sv[:, 0], sv[:, 1], s=100, linewidth=1, facecolors='none', edgecolors='k')
+# plotting support vectors
+axes.scatter(best_sv_2[:, 0], best_sv_2[:, 1], s=100, linewidth=1, facecolors='none', edgecolors='k')
 
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
-    plt.savefig("results/svm/DS5_boundary"+str(i))
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.savefig("results/svm/DS5_boundary_svm")
 
-    # evaluating the confusion matrix
-    getConfusion(y_test, y_pred_t, "DS5_"+str(i))
+# evaluating the confusion matrix
+getConfusion(y_test, best_svclassifier_2.predict(X_test), "DS5_best_model_svm")
+
+print("Best model for Dataset 5:")
+print("C:", best_model_C_2)
+print("Validation Accuracy:", best_val_acc_2)
 
 np.savetxt('results/svm/Train_acc_ds5',acc_train_data2,fmt='%.2f')
 np.savetxt('results/svm/Val_acc_ds5',acc_val_data2,fmt='%.2f')
