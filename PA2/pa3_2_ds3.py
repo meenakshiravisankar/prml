@@ -56,6 +56,14 @@ y_val = data[train_size:train_size+val_size,-1]
 X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
 y_test = data[train_size+val_size:train_size+val_size+test_size,-1]
 
+# standardizing the data
+mean = np.mean(X_train,axis=0)
+std = np.std(X_train,axis=0)
+
+X_train = np.divide(X_train-mean, std)
+X_val = np.divide(X_val-mean, std)
+X_test = np.divide(X_test-mean, std)
+
 acc_linear_train = []
 acc_linear_val = []
 acc_linear_test = []

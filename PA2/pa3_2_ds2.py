@@ -4,20 +4,12 @@
 # https://stackoverflow.com/questions/26558816/matplotlib-scatter-plot-with-legend
 
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 import seaborn as sns
 from mpl_toolkits import mplot3d
-
-def plot_3D(X, y, elev=30, azim=30):
-    r = np.exp(-(X ** 2).sum(1))
-    ax = plt.subplot(projection='3d')
-    ax.scatter3D(X[:, 0], X[:, 1], r, c=y, s=50, cmap='autumn')
-    ax.view_init(elev=elev, azim=azim)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('r')
-    plt.savefig("results/svmrbfker/DS2_boundary_transformed")
+from sklearn.cluster import KMeans
 
 # seeding
 np.random.seed(seed=42)
@@ -34,6 +26,34 @@ def getName(x):
     if x == 1:
         return "Class 1"
     return "Class 0"
+
+# finds covariance of two feature vectors
+def getCovariance(X1, X2):
+    Z = []
+    n = len(X1)
+    for i in range(n):
+        Z.append(X1[i]*X2[i])
+    e_x1x2 = np.mean(Z)
+    e_x1 = np.mean(X1)
+    e_x2 = np.mean(X2)
+    cov = e_x1x2 - (e_x1*e_x2)
+    return cov
+
+def evalNDGaussian(X, mu, sigma):
+    #X = np.transpose(X[np.newaxis])
+    n = X.shape[0]
+    det = np.linalg.det(sigma)
+    det_sqr = math.sqrt(det)
+    sigma_inv = np.linalg.inv(sigma)
+    exponent = (-0.5) * np.matmul(np.matmul((X - mu),sigma_inv),np.transpose(X - mu))
+    factor = math.sqrt((2 * math.pi)**n) * det_sqr
+    return math.exp(exponent)/factor
+
+# simple function to get transformed space by evaluating gaussian pdf
+def getTransformed(X):
+    mu = np.mean(X, axis=0)
+    sigma = np.cov(np.transpose(X))
+    return np.array([evalNDGaussian(np.array(x), mu, sigma) for x in X])
 
 # class labels
 classes = [0, 1]
@@ -66,6 +86,14 @@ y_val = data[train_size:train_size+val_size,-1]
 
 X_test = data[train_size+val_size:train_size+val_size+test_size,:2]
 y_test = data[train_size+val_size:train_size+val_size+test_size,-1]
+
+# standardizing the data
+mean = np.mean(X_train,axis=0)
+std = np.std(X_train,axis=0)
+
+X_train = np.divide(X_train-mean, std)
+X_val = np.divide(X_val-mean, std)
+X_test = np.divide(X_test-mean, std)
 
 acc_linear_train = []
 acc_linear_val = []
@@ -136,6 +164,26 @@ print("Validation Accuracy:", best_val_acc_1)
 np.savetxt('results/svmlinker/Train_acc_ds2',acc_linear_train,fmt='%.2f')
 np.savetxt('results/svmlinker/Val_acc_ds2',acc_linear_val,fmt='%.2f')
 np.savetxt('results/svmlinker/Test_acc_ds2',acc_linear_test,fmt='%.2f')
+
+# kmeans = KMeans(n_clusters=2, random_state=42).fit(X_train)
+# cc = kmeans.cluster_centers_
+# labels = np.array(kmeans.labels_).reshape(X_train.shape[0],1)
+# dat = np.concatenate((X_train,labels),axis=1)
+#
+# x1 = np.array(dat[dat[:,2]==0])
+# x2 = np.array(dat[dat[:,2]==1])
+#
+# x1 = x1[:, :-1]
+# x2 = x2[:, :-1]
+#
+# print(x1.shape)
+# print(x2.shape)
+#
+# phi1 = getTransformed(x1)
+# phi2 = getTransformed(x2)
+#
+# print(phi1.shape)
+# print(phi2.shape)
 
 acc_poly_train = []
 acc_poly_val = []
@@ -275,8 +323,6 @@ plt.xlabel("Feature 1")
 plt.ylabel("Feature 2")
 plt.savefig("results/svmrbfker/DS2_boundary_rbf")
 plt.clf()
-
-plot_3D(X_train, y_train);
 
 print("Best rbf kernel SVM model for Dataset 2:")
 print("C:", best_model_C_3)
